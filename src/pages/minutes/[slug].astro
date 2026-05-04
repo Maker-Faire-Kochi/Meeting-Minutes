@@ -19,13 +19,14 @@ export async function getStaticPaths() {
 }
 
 const { minute } = Astro.props;
+const base = import.meta.env.BASE_URL;
 if (!minute) {
   throw new Error('Minute not found.');
 }
 ---
 
 <BaseLayout title={minute.title}>
-  <a class="back-link" href="/">← Back to all minutes</a>
+  <a class="back-link" href={base}>← Back to all minutes</a>
   <div class="minute-content">
     <span class="minute-meta">{minute.dateLabel}</span>
     <h1>{minute.title}</h1>
