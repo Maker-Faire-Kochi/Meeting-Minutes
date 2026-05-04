@@ -3,6 +3,7 @@ import '../styles/global.css';
 
 const { title } = Astro.props;
 const pageTitle = title ? `${title} | Meeting Minutes` : 'Meeting Minutes';
+const base = import.meta.env.BASE_URL;
 ---
 <!doctype html>
 <html lang="en">
@@ -14,7 +15,7 @@ const pageTitle = title ? `${title} | Meeting Minutes` : 'Meeting Minutes';
   <body>
     <main class="page">
       <header class="site-header">
-        <a class="site-title" href="/">Meeting Minutes</a>
+        <a class="site-title" href={base}>Meeting Minutes</a>
         <span class="site-subtitle">Maker Faire Kochi 2026</span>
       </header>
       <section class="content">

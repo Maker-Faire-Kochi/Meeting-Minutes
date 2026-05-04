@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getMinutesList } from '../lib/minutes';
 
 const minutes = await getMinutesList();
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title="All Minutes">
@@ -22,7 +23,7 @@ const minutes = await getMinutesList();
           >
             <span class="minute-meta">{minute.dateLabel}</span>
             <h2>
-              <a href={`/minutes/${minute.slug}`}>{minute.title}</a>
+              <a href={`${base}minutes/${minute.slug}`}>{minute.title}</a>
             </h2>
             <p>{minute.excerpt}</p>
           </li>
