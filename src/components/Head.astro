@@ -203,12 +203,17 @@ const { title, description, image = "/makerfaire-kochi-og.png" } = Astro.props;
   }
 
   function preloadTheme() {
-    const userTheme = localStorage.theme;
+    const userTheme = localStorage.getItem("theme");
 
-    if (userTheme === "light" || userTheme === "dark") {
-      toggleTheme(userTheme === "dark");
-    } else {
+    if (userTheme === "dark") {
+      toggleTheme(true);
+    } else if (userTheme === "light") {
+      toggleTheme(false);
+    } else if (userTheme === "system") {
       toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
+    } else {
+      // Default to light mode for first-time visitors
+      toggleTheme(false);
     }
   }
 
