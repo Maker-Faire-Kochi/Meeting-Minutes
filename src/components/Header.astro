@@ -22,9 +22,15 @@ import Link from "@components/Link.astro";
         <span>
           {`/`}
         </span>
+        <Link href="/wiki">wiki</Link>
+        <span>
+          {`/`}
+        </span>
         <button
           id="magnifying-glass"
-          aria-label="Search"
+          data-search-open
+          aria-label="Search (Ctrl+K)"
+          aria-keyshortcuts="Control+K Meta+K /"
           class="flex items-center rounded-sm border border-black/15 bg-neutral-100 px-2 py-1 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:bg-neutral-900 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
         >
           <svg
@@ -40,6 +46,7 @@ import Link from "@components/Link.astro";
               fill="currentColor"></path></svg
           >
           &nbsp;Search
+          <kbd class="ml-1.5 hidden rounded-sm border border-black/15 px-1 font-sans text-[10px] sm:inline dark:border-white/20">⌘K</kbd>
         </button>
       </nav>
     </div>

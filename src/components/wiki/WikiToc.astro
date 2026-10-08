@@ -1,0 +1,37 @@
+---
+import type { MarkdownHeading } from "astro";
+import { cn } from "@lib/utils";
+
+type Props = {
+  headings: MarkdownHeading[];
+  title?: boolean;
+};
+
+const { title = true } = Astro.props;
+const headings = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  headings.length > 0 && (
+    <nav aria-label="On this page" class="text-sm">
+      {title && (
+        <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/50 dark:text-white/50">
+          On this page
+        </div>
+      )}
+      <ul class="space-y-1.5 border-l border-black/10 dark:border-white/10">
+        {headings.map((heading) => (
+          <li class={cn(heading.depth === 3 ? "pl-6" : "pl-3")}>
+            <a
+              href={`#${heading.slug}`}
+              data-toc-link={heading.slug}
+              class="block transition-colors duration-300 ease-in-out hover:text-black dark:hover:text-white"
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

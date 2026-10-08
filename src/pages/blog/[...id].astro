@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { type CollectionEntry, render } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
@@ -8,11 +8,21 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import Giscus from "@components/Giscus.astro";
+import DocScripts from "@components/DocScripts.astro";
+import SearchMeta from "@components/SearchMeta.astro";
+import MeetingInfo from "@components/minutes/MeetingInfo.astro";
+import MinutesCard from "@components/minutes/MinutesCard.astro";
+import {
+  MODE_LABEL,
+  getMinutes,
+  minutesEditUrl,
+  minutesHistoryUrl,
+  parseActionItems,
+  relatedMinutes,
+} from "@lib/minutes";
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("blog"))
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const posts = await getMinutes();
   return posts.map((post) => ({
     params: { id: post.id },
     props: post,
@@ -20,60 +30,63 @@ export async function getStaticPaths() {
 }
 type Props = CollectionEntry<"blog">;
 
-const posts = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-function getNextPost() {
-  let postIndex;
-  for (const post of posts) {
-    if (post.id === Astro.params.id) {
-      postIndex = posts.indexOf(post);
-      return posts[postIndex + 1];
-    }
-  }
-}
-
-function getPrevPost() {
-  let postIndex;
-  for (const post of posts) {
-    if (post.id === Astro.params.id) {
-      postIndex = posts.indexOf(post);
-      return posts[postIndex - 1];
-    }
-  }
-}
-
-const nextPost = getNextPost();
-const prevPost = getPrevPost();
-
 const post = Astro.props;
+const posts = await getMinutes();
+const index = posts.findIndex((p) => p.id === post.id);
+// Newer meeting on the left, older on the right, matching the list order.
+const prevPost = posts[index - 1];
+const nextPost = posts[index + 1];
+
 const { Content, headings } = await render(post);
+const actions = parseActionItems(post);
+const openActions = actions.filter((item) => !item.done).length;
+const actionsHeading = headings.find((h) => /action items?/i.test(h.text));
+const related = relatedMinutes(post, posts);
+const edit = minutesEditUrl(post);
+const history = minutesHistoryUrl(post);
+// e.g. "Hybrid · Finger Space + online"; skip the format when the location already says it.
+const modeText = post.data.mode && MODE_LABEL[post.data.mode].replace(/^\S+\s/, "");
+const searchContext = [
+  modeText && !post.data.location?.toLowerCase().startsWith(modeText.toLowerCase()) ? modeText : undefined,
+  post.data.location,
+]
+  .filter(Boolean)
+  .join(" · ");
+const actionClass =
+  "rounded-sm border border-black/15 px-2 py-1 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white";
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
   <Container>
-    <div class="animate">
+    <div class="animate flex flex-wrap items-center justify-between gap-2" data-pagefind-ignore>
       <BackToPrevious href="/blog">Back to minutes</BackToPrevious>
+      <a href="/blog/actions" class="text-sm underline underline-offset-[3px] hover:text-primary">
+        Action tracker →
+      </a>
     </div>
-    <div class="my-10 space-y-1">
-      <div class="animate flex items-center gap-1.5">
-        <div class="font-base text-sm">
-          <FormattedDate date={post.data.date} />
-        </div>
-        &bull;
+    <div data-pagefind-body>
+    <SearchMeta
+      type="Minutes"
+      date={post.data.date}
+      context={searchContext}
+    />
+    <div class="my-10 space-y-3">
+      <div class="animate flex items-center gap-1.5 text-sm">
+        <FormattedDate date={post.data.date} />
         {post.body && (
-          <div class="font-base text-sm">
-            {readingTime(post.body)}
-          </div>
-        )}        
+          <>
+            &bull;
+            <span>{readingTime(post.body)}</span>
+          </>
+        )}
       </div>
       <h1 class="animate text-3xl font-semibold text-black dark:text-white">
         {post.data.title}
       </h1>
+      <p class="animate">{post.data.description}</p>
       {
-        post.data.tags && post.data.tags?.length > 0 ? (
-          <div class="animate flex gap-2 pt-1">
+        post.data.tags && post.data.tags.length > 0 && (
+          <div class="animate flex flex-wrap gap-2 pt-1">
             {post.data.tags.map((tag) => (
               <a
                 href={`/tags/${tag}`}
@@ -83,18 +96,97 @@ const { Content, headings } = await render(post);
               </a>
             ))}
           </div>
-        ) : null
+        )
       }
     </div>
-    {headings.length > 0 && <TableOfContents headings={headings} />}
-    <article class="animate">
+
+    <div class="animate space-y-4">
+      <MeetingInfo meeting={post} />
+      {
+        actions.length > 0 && (
+          <a
+            data-pagefind-ignore
+            href={actionsHeading ? `#${actionsHeading.slug}` : "/blog/actions"}
+            class="flex items-center justify-between gap-3 rounded-lg border border-black/15 px-4 py-3 text-sm transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            <span>
+              ✅ <strong class="text-black dark:text-white">{actions.length}</strong>
+              {actions.length === 1 ? " action item" : " action items"} ·{" "}
+              <strong class="text-black dark:text-white">{openActions}</strong> open
+            </span>
+            <span class="text-xs">Jump to action items ↓</span>
+          </a>
+        )
+      }
+      {headings.length > 0 && <div data-pagefind-ignore><TableOfContents headings={headings} /></div>}
+    </div>
+
+    <article class="doc-content animate mt-8">
       <Content />
-      <div class="mt-24">
-        <PostNavigation prevPost={prevPost} nextPost={nextPost} />
-      </div>
-      <div class="mt-24">
-        <Giscus />
-      </div>
     </article>
+
+    {
+      post.data.resources && post.data.resources.length > 0 && (
+        <section class="animate mt-12 space-y-3" data-pagefind-ignore>
+          <h2 class="font-semibold text-black dark:text-white">Resources</h2>
+          <ul class="space-y-1.5 text-sm">
+            {post.data.resources.map((resource) => (
+              <li>
+                <a href={resource.url} target="_blank" rel="noopener" class="underline underline-offset-[3px] hover:text-primary">
+                  🔗 {resource.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="animate mt-12 space-y-4" data-pagefind-ignore>
+          <h2 class="font-semibold text-black dark:text-white">Related meetings</h2>
+          <ul class="flex flex-col gap-3">
+            {related.map((meeting) => (
+              <li>
+                <MinutesCard meeting={meeting} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <div
+      data-pagefind-ignore
+      class="no-print animate mt-16 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 text-sm dark:border-white/10"
+    >
+      {
+        edit && (
+          <a href={edit} target="_blank" rel="noopener" class={actionClass}>
+            ✏️ Edit minutes
+          </a>
+        )
+      }
+      {
+        history && (
+          <a href={history} target="_blank" rel="noopener" class={actionClass}>
+            🕘 History
+          </a>
+        )
+      }
+      <button type="button" data-copy-url class={actionClass}>🔗 Copy link</button>
+      <button type="button" onclick="window.print()" class={actionClass}>🖨️ Print</button>
+    </div>
+
+    <div class="no-print mt-8">
+      <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+    </div>
+    <div class="no-print mt-16">
+      <Giscus />
+    </div>
   </Container>
+  <DocScripts />
 </Layout>

@@ -3,15 +3,10 @@ title: "Venue Site Visit & Layout Planning"
 description: "Walkthrough of the proposed event venue, layout discussions, parking assessment, and logistics planning."
 date: "2026-04-29"
 tags: ["site-visit", "venue", "layout", "parking"]
----
-
-## Meeting Details
-
-- **Date:** April 29, 2026
-- **Time:** 4:30 PM
-- **Location:** Event Venue (Site Visit)
-- **Attendees:** Abhiram, Samad, Shaan, Midlaj, Jasim, Jaseel, Salman, Anin
-
+time: "4:30 PM"
+location: "Event venue (site visit)"
+mode: "in-person"
+attendees: ["Abhiram", "Samad", "Shaan", "Midlaj", "Jasim", "Jaseel", "Salman", "Anin"]
 ---
 
 ## Agenda

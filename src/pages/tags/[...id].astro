@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
+import MinutesCard from "@components/minutes/MinutesCard.astro";
 import BackToPrevious from "@components/BackToPrevious.astro";
 
 export async function getStaticPaths() {
@@ -29,15 +29,25 @@ const sortedPosts = posts.sort(
 );
 ---
 
-<Layout title={`Tag: ${id}`} description={`Posts with the tag: ${id}`}>
+<Layout title={`Tag: ${id}`} description={`Meeting minutes tagged ${id}`}>
   <Container>
     <div class="space-y-10" data-pagefind-ignore>
       <BackToPrevious href="/tags"> All tags </BackToPrevious>
       <h1 class="animate font-semibold text-black dark:text-white">
-        Posts tagged with "{id}"
+        Minutes tagged “{id}”
       </h1>
-      <ul class="animate flex flex-col gap-4">
-        {sortedPosts.map((post) => <ArrowCard entry={post} />)}
+      <p class="animate text-sm">
+        {sortedPosts.length} meeting{sortedPosts.length === 1 ? "" : "s"} ·{" "}
+        <a href={`/blog?tag=${encodeURIComponent(id ?? "")}`} class="underline underline-offset-2 hover:text-primary">
+          Open in the filterable list
+        </a>
+      </p>
+      <ul class="animate flex flex-col gap-3">
+        {sortedPosts.map((post) => (
+          <li>
+            <MinutesCard meeting={post} />
+          </li>
+        ))}
       </ul>
     </div>
   </Container>

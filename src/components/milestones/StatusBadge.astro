@@ -1,0 +1,12 @@
+---
+import type { Milestone } from "@lib/milestones";
+import { STATUS_META, statusOf } from "@lib/milestones";
+
+type Props = { milestone: Milestone };
+
+const meta = STATUS_META[statusOf(Astro.props.milestone)];
+---
+
+<span class:list={["rounded-sm border px-1.5 py-0.5 text-xs font-medium", meta.badge]}>
+  {meta.label}
+</span>

@@ -2,7 +2,9 @@
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
-import ArrowCard from "@components/ArrowCard.astro";
+import MinutesCard from "@components/minutes/MinutesCard.astro";
+import MilestoneCard from "@components/milestones/MilestoneCard.astro";
+import DocScripts from "@components/DocScripts.astro";
 import Link from "@components/Link.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
@@ -40,10 +42,24 @@ const projects: CollectionEntry<"projects">[] = (
             <span class="animate">
               <p>
                 Use the search functionality (press <kbd class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs">/</kbd> or click search) 
-                to look up decisions, action items, or specific topics from our archives. You can also review active development repos and deployment plans under our projects section.
+                to look up decisions, action items, or specific topics from our archives. You can also follow the roadmap and progress of each milestone under the milestones section.
               </p>
             </span>
           </article>
+        </section>
+
+        <section class="animate space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-y-2">
+            <h2 class="font-semibold text-black dark:text-white">
+              Wiki
+            </h2>
+            <Link href="/wiki"> Open the wiki </Link>
+          </div>
+          <p>
+            Our living knowledge base of how Maker Faire Kochi is planned, funded,
+            run, and communicated. Start here if you're joining the organizing
+            team, or planning a future edition.
+          </p>
         </section>
 
         <section class="animate space-y-6">
@@ -57,7 +73,7 @@ const projects: CollectionEntry<"projects">[] = (
             {
               blog.map((post) => (
                 <li>
-                  <ArrowCard entry={post} />
+                  <MinutesCard meeting={post} />
                 </li>
               ))
             }
@@ -75,7 +91,7 @@ const projects: CollectionEntry<"projects">[] = (
             {
               projects.map((project) => (
                 <li>
-                  <ArrowCard entry={project} />
+                  <MilestoneCard milestone={project} />
                 </li>
               ))
             }
@@ -120,4 +136,5 @@ const projects: CollectionEntry<"projects">[] = (
       </div>
     </aside>
   </Container>
+  <DocScripts />
 </Layout>

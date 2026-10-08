@@ -1,32 +1,171 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+import DocScripts from "@components/DocScripts.astro";
+import MilestoneCard from "@components/milestones/MilestoneCard.astro";
+import ProgressBar from "@components/milestones/ProgressBar.astro";
 import { PROJECTS } from "@consts";
+import { REPO_URL } from "@lib/wiki";
+import { STATUS_META, getMilestones, getProgress, statusOf, type MilestoneStatus } from "@lib/milestones";
 
-const projects = (await getCollection("projects"))
-  .filter((project) => !project.data.draft)
-  .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+const milestones = await getMilestones();
+const progress = milestones.map(getProgress);
+const steps = progress.reduce((sum, p) => sum + p.total, 0);
+const stepsDone = progress.reduce((sum, p) => sum + p.done, 0);
+const done = milestones.filter((m) => m.data.status === "done").length;
+const overall = steps ? Math.round((stepsDone / steps) * 100) : 0;
+
+const statuses = [...new Set(milestones.map(statusOf))] as (MilestoneStatus | "unset")[];
+const first = milestones[0]?.data.date;
+const last = milestones.at(-1)?.data.date;
+
+const chipClass =
+  "rounded-sm border border-black/15 px-2 py-0.5 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:aria-pressed:text-white";
 ---
 
 <Layout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
   <Container>
-    <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="animate font-semibold text-black dark:text-white">
-          Roadmap & Milestones
-        </div>
-        <ul class="animate not-prose flex flex-col gap-4">
-          {
-            projects.map((project) => (
-              <li>
-                <ArrowCard entry={project} />
-              </li>
-            ))
-          }
-        </ul>
+    <div class="space-y-10" data-pagefind-ignore>
+      <div class="animate space-y-4">
+        <h1 class="text-3xl font-semibold text-black dark:text-white">Roadmap & milestones</h1>
+        <p>{PROJECTS.DESCRIPTION}</p>
+        <dl class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Milestones</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">
+              {done}<span class="text-sm font-normal"> / {milestones.length} done</span>
+            </dd>
+          </div>
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Steps</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">
+              {stepsDone}<span class="text-sm font-normal"> / {steps} done</span>
+            </dd>
+          </div>
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Next target</dt>
+            <dd class="font-semibold text-black dark:text-white" data-next-target>–</dd>
+          </div>
+        </dl>
+        <ProgressBar percent={overall} label={`${overall}% of steps done`} size="md" />
+        {
+          first && last && (
+            <p class="text-xs">
+              Roadmap runs from <FormattedDate date={first} /> to <FormattedDate date={last} />.
+              Progress is counted from the checklists in each milestone.
+            </p>
+          )
+        }
       </div>
-    </aside>
+
+      <div class="animate flex flex-wrap items-center gap-1.5" data-milestone-filters>
+        <span class="mr-1 text-xs">Status:</span>
+        {
+          statuses.map((status) => (
+            <button type="button" data-filter-status={status} aria-pressed="false" class={chipClass}>
+              {STATUS_META[status].label}
+            </button>
+          ))
+        }
+        <a
+          href={`${REPO_URL}/new/main/src/content/projects`}
+          target="_blank"
+          rel="noopener"
+          class="ml-auto rounded-sm border border-black/15 px-2 py-0.5 text-xs transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+        >
+          ➕ New milestone
+        </a>
+      </div>
+
+      <ol class="animate relative space-y-6 border-l-2 border-black/10 pl-6 dark:border-white/10" data-timeline>
+        {
+          milestones.map((milestone) => {
+            const iso = milestone.data.date.toISOString().slice(0, 10);
+            return (
+              <li
+                class="relative"
+                data-timeline-item
+                data-status={statusOf(milestone)}
+                data-date={iso}
+                data-title={milestone.data.title}
+              >
+                <span
+                  aria-hidden="true"
+                  class:list={[
+                    "absolute -left-[33px] top-4 size-4 rounded-full border-2",
+                    STATUS_META[statusOf(milestone)].dot,
+                  ]}
+                />
+                <MilestoneCard milestone={milestone} />
+              </li>
+            );
+          })
+        }
+      </ol>
+      <p data-filter-empty hidden class="text-sm">No milestones with this status.</p>
+    </div>
   </Container>
+  <DocScripts />
 </Layout>
+
+<script>
+  function setupRoadmap() {
+    const timeline = document.querySelector<HTMLElement>("[data-timeline]");
+    if (!timeline || timeline.dataset.ready) return;
+    timeline.dataset.ready = "true";
+
+    const items = Array.from(timeline.querySelectorAll<HTMLElement>("[data-timeline-item]"));
+    const today = new Date().toISOString().slice(0, 10);
+
+    // "Today" marker before the first milestone that is still ahead.
+    const upcoming = items.find((item) => (item.dataset.date ?? "") >= today);
+    const marker = document.createElement("li");
+    marker.className = "relative -ml-6 flex items-center gap-2 pl-0 text-xs font-semibold text-secondary";
+    marker.dataset.todayMarker = "";
+    marker.innerHTML =
+      '<span class="absolute -left-[7px] size-3 rounded-full bg-secondary ring-4 ring-secondary/20"></span><span class="ml-4">Today</span><span class="h-px flex-1 bg-secondary/40"></span>';
+    timeline.insertBefore(marker, upcoming ?? null);
+
+    const next = document.querySelector<HTMLElement>("[data-next-target]");
+    if (next) {
+      if (upcoming) {
+        const [y, m, d] = upcoming.dataset.date!.split("-").map(Number);
+        const days = Math.round((new Date(y, m - 1, d).valueOf() - new Date(new Date().toDateString()).valueOf()) / 86_400_000);
+        next.textContent = days === 0 ? "Today" : `in ${days} day${days === 1 ? "" : "s"}`;
+        next.title = upcoming.dataset.title ?? "";
+      } else {
+        next.textContent = "All targets passed";
+      }
+    }
+
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-filter-status]"));
+    const empty = document.querySelector<HTMLElement>("[data-filter-empty]")!;
+    const apply = () => {
+      const selected = buttons
+        .filter((b) => b.getAttribute("aria-pressed") === "true")
+        .map((b) => b.dataset.filterStatus);
+      let shown = 0;
+      for (const item of items) {
+        item.hidden = selected.length > 0 && !selected.includes(item.dataset.status);
+        if (!item.hidden) shown++;
+      }
+      marker.hidden = selected.length > 0;
+      empty.hidden = shown > 0;
+      const params = new URLSearchParams();
+      selected.forEach((s) => params.append("status", s!));
+      history.replaceState(history.state, "", params.size ? `?${params}` : location.pathname);
+    };
+    const initial = new URLSearchParams(location.search).getAll("status");
+    buttons.forEach((b) => {
+      b.setAttribute("aria-pressed", String(initial.includes(b.dataset.filterStatus!)));
+      b.addEventListener("click", () => {
+        b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+        apply();
+      });
+    });
+    apply();
+  }
+
+  document.addEventListener("astro:page-load", setupRoadmap);
+</script>

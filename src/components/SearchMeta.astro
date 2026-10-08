@@ -1,0 +1,20 @@
+---
+// Describes a page to the Pagefind index. Place it inside the page's `data-pagefind-body`
+// element. Values are written as attributes, so nothing here is visible or indexed as text.
+type Props = {
+  type: "Minutes" | "Wiki" | "Milestones";
+  date?: Date;
+  /** Short context shown next to the result, e.g. "Hybrid · Finger Space" or a wiki section path. */
+  context?: string;
+};
+
+const { type, date, context } = Astro.props;
+// Pagefind separates multiple key:value pairs with commas, so values must not contain any.
+const clean = (value: string) => value.replace(/,/g, " ").replace(/\s+/g, " ").trim();
+// Every indexed page gets a sort date so "Newest/Oldest first" never drops results.
+const iso = date ? date.toISOString().slice(0, 10) : "1970-01-01";
+---
+
+<span hidden data-pagefind-filter={`type:${type}`}></span>
+<span hidden data-pagefind-meta={`date:${iso}`} data-pagefind-sort={`date:${iso}`}></span>
+{context && <span hidden data-pagefind-meta={`context:${clean(context)}`}></span>}

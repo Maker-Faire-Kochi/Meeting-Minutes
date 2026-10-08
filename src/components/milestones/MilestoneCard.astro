@@ -1,0 +1,33 @@
+---
+import type { Milestone } from "@lib/milestones";
+import { getProgress } from "@lib/milestones";
+import FormattedDate from "@components/FormattedDate.astro";
+import StatusBadge from "./StatusBadge.astro";
+import ProgressBar from "./ProgressBar.astro";
+
+type Props = { milestone: Milestone };
+
+const { milestone } = Astro.props;
+const { data } = milestone;
+const progress = getProgress(milestone);
+const isoDate = data.date.toISOString().slice(0, 10);
+---
+
+<a
+  href={`/projects/${milestone.id}`}
+  class="not-prose group block space-y-2 rounded-lg border border-black/15 px-4 py-3 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+>
+  <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+    <StatusBadge milestone={milestone} />
+    <span>🎯 <FormattedDate date={data.date} /></span>
+    <span class="text-black/50 dark:text-white/50" data-relative-date={isoDate}></span>
+    {data.owner && <span>👤 {data.owner}</span>}
+  </div>
+  <div class="font-semibold">{data.title}</div>
+  <div class="text-sm">{data.description}</div>
+  {
+    progress.total > 0 && (
+      <ProgressBar percent={progress.percent} label={`${progress.done}/${progress.total} steps`} />
+    )
+  }
+</a>

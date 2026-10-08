@@ -1,69 +1,161 @@
 ---
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { type CollectionEntry, render } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
-import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
-import Link from "@components/Link.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import Giscus from "@components/Giscus.astro";
+import DocScripts from "@components/DocScripts.astro";
+import SearchMeta from "@components/SearchMeta.astro";
+import WikiPrevNext from "@components/wiki/WikiPrevNext.astro";
+import MinutesCard from "@components/minutes/MinutesCard.astro";
+import StatusBadge from "@components/milestones/StatusBadge.astro";
+import ProgressBar from "@components/milestones/ProgressBar.astro";
+import { getMinutes } from "@lib/minutes";
+import {
+  getMilestones,
+  getProgress,
+  linkedMinutes,
+  milestoneEditUrl,
+  milestoneHistoryUrl,
+  STATUS_META,
+  statusOf,
+} from "@lib/milestones";
 
 export async function getStaticPaths() {
-  const projects = (await getCollection("projects"))
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return projects.map((project) => ({
-    params: { id: project.id },
-    props: project,
+  const milestones = await getMilestones();
+  return milestones.map((milestone) => ({
+    params: { id: milestone.id },
+    props: milestone,
   }));
 }
 type Props = CollectionEntry<"projects">;
 
-const project = Astro.props;
-const { Content, headings } = await render(project);
+const milestone = Astro.props;
+const { data } = milestone;
+const { Content, headings } = await render(milestone);
+
+const milestones = await getMilestones();
+const index = milestones.findIndex((m) => m.id === milestone.id);
+const toLink = (m: (typeof milestones)[number] | undefined) =>
+  m && { href: `/projects/${m.id}`, title: m.data.title };
+const prev = toLink(milestones[index - 1]);
+const next = toLink(milestones[index + 1]);
+
+const progress = getProgress(milestone);
+const meetings = linkedMinutes(milestone, await getMinutes());
+const isoDate = data.date.toISOString().slice(0, 10);
+const edit = milestoneEditUrl(milestone);
+const history = milestoneHistoryUrl(milestone);
+const actionClass =
+  "rounded-sm border border-black/15 px-2 py-1 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white";
 ---
 
-<Layout title={project.data.title} description={project.data.description}>
+<Layout title={data.title} description={data.description}>
   <Container>
-    <div class="animate">
-      <BackToPrevious href="/projects">Back to milestones</BackToPrevious>
+    <div class="animate flex flex-wrap items-center justify-between gap-2" data-pagefind-ignore>
+      <BackToPrevious href="/projects">Back to roadmap</BackToPrevious>
+      <span class="text-sm">Milestone {index + 1} of {milestones.length}</span>
     </div>
-    <div class="animate my-10 space-y-1">
-      <div class="flex items-center gap-1.5">
-        <div class="font-base text-sm">
-          <FormattedDate date={project.data.date} />
-        </div>
-        &bull;
-        {project.body && (
-          <div class="font-base text-sm">
-            {readingTime(project.body)}
-          </div>
-        )}     
+
+    <div data-pagefind-body>
+    <SearchMeta
+      type="Milestones"
+      date={data.date}
+      context={[STATUS_META[statusOf(milestone)].label, data.owner].filter(Boolean).join(" · ")}
+    />
+    <div class="my-10 space-y-3">
+      <div class="animate flex flex-wrap items-center gap-2 text-sm" data-pagefind-ignore>
+        <StatusBadge milestone={milestone} />
+        <span>🎯 Target <FormattedDate date={data.date} /></span>
+        <span class="text-black/50 dark:text-white/50">(<span data-relative-date={isoDate}></span>)</span>
+        {data.owner && <span>👤 {data.owner}</span>}
       </div>
-      <h1 class="text-3xl font-semibold text-black dark:text-white">
-        {project.data.title}
-      </h1>
+      <h1 class="animate text-3xl font-semibold text-black dark:text-white">{data.title}</h1>
+      <p class="animate">{data.description}</p>
       {
-        (project.data.demoURL || project.data.repoURL) && (
-          <nav class="flex gap-1">
-            {project.data.demoURL && (
-              <Link href={project.data.demoURL} external>
-                link
-              </Link>
+        (data.demoURL || data.repoURL) && (
+          <div class="animate flex flex-wrap gap-2 pt-1 text-sm" data-pagefind-ignore>
+            {data.demoURL && (
+              <a href={data.demoURL} target="_blank" rel="noopener" class={actionClass}>
+                🔗 Link
+              </a>
             )}
-            {project.data.demoURL && project.data.repoURL && <span>/</span>}
-            {project.data.repoURL && (
-              <Link href={project.data.repoURL} external>
-                resources
-              </Link>
+            {data.repoURL && (
+              <a href={data.repoURL} target="_blank" rel="noopener" class={actionClass}>
+                📁 Resources
+              </a>
             )}
-          </nav>
+          </div>
         )
       }
     </div>
-    <TableOfContents headings={headings} />
-    <article class="animate">
+
+    <div class="animate space-y-4" data-pagefind-ignore>
+      {
+        progress.total > 0 && (
+          <div class="rounded-lg border border-black/15 px-4 py-3 dark:border-white/20">
+            <div class="mb-2 text-sm">
+              <strong class="text-black dark:text-white">{progress.done}</strong> of {progress.total} steps
+              done
+            </div>
+            <ProgressBar percent={progress.percent} label={`${progress.percent}%`} size="md" />
+          </div>
+        )
+      }
+      {headings.length > 0 && <div data-pagefind-ignore><TableOfContents headings={headings} /></div>}
+    </div>
+
+    <article class="doc-content animate mt-8">
       <Content />
     </article>
+
+    </div>
+
+    {
+      meetings.length > 0 && (
+        <section class="animate mt-12 space-y-4" data-pagefind-ignore>
+          <h2 class="font-semibold text-black dark:text-white">Discussed in</h2>
+          <ul class="flex flex-col gap-3">
+            {meetings.map((meeting) => (
+              <li>
+                <MinutesCard meeting={meeting} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <div
+      data-pagefind-ignore
+      class="no-print animate mt-16 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 text-sm dark:border-white/10"
+    >
+      {
+        edit && (
+          <a href={edit} target="_blank" rel="noopener" class={actionClass}>
+            ✏️ Update milestone
+          </a>
+        )
+      }
+      {
+        history && (
+          <a href={history} target="_blank" rel="noopener" class={actionClass}>
+            🕘 History
+          </a>
+        )
+      }
+      <button type="button" data-copy-url class={actionClass}>🔗 Copy link</button>
+      <button type="button" onclick="window.print()" class={actionClass}>🖨️ Print</button>
+    </div>
+
+    <div class="no-print animate mt-8">
+      <WikiPrevNext prev={prev} next={next} labels={["Earlier milestone", "Next milestone"]} />
+    </div>
+    <div class="no-print mt-16">
+      <Giscus />
+    </div>
   </Container>
+  <DocScripts />
 </Layout>

@@ -1,0 +1,54 @@
+---
+import WikiLayout from "@layouts/WikiLayout.astro";
+import WikiBreadcrumbs from "@components/wiki/WikiBreadcrumbs.astro";
+import WikiPageList from "@components/wiki/WikiPageList.astro";
+import { buildWikiTree, flattenTree, getWikiEntries, visibleChildren } from "@lib/wiki";
+
+const root = buildWikiTree(await getWikiEntries());
+const pages = flattenTree(root).filter((page) => page !== root);
+
+const byLetter = new Map<string, typeof pages>();
+for (const page of [...pages].sort((a, b) => a.title.localeCompare(b.title))) {
+  const letter = page.title.charAt(0).toUpperCase();
+  byLetter.set(letter, [...(byLetter.get(letter) ?? []), page]);
+}
+const letters = [...byLetter.keys()];
+---
+
+<WikiLayout
+  title="All wiki pages"
+  description="An A–Z index of every page in the Maker Faire Kochi wiki."
+  root={root}
+  activeKey="@all"
+>
+  <div class="animate space-y-3">
+    <WikiBreadcrumbs trail={[root, { ...root, title: "All pages", entry: undefined }]} />
+    <h1 class="text-3xl font-semibold text-black dark:text-white">📚 All pages</h1>
+    <p>
+      {pages.length} pages across {visibleChildren(root).length} sections, A–Z.
+    </p>
+    <nav aria-label="Jump to letter" class="flex flex-wrap gap-1 pt-2 text-sm">
+      {
+        letters.map((letter) => (
+          <a
+            href={`#letter-${letter}`}
+            class="rounded-sm border border-black/15 px-2 py-0.5 transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            {letter}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="animate mt-10 space-y-10">
+    {
+      letters.map((letter) => (
+        <section id={`letter-${letter}`} class="space-y-3">
+          <h2 class="text-lg font-semibold text-black dark:text-white">{letter}</h2>
+          <WikiPageList pages={byLetter.get(letter)!} meta />
+        </section>
+      ))
+    }
+  </div>
+</WikiLayout>

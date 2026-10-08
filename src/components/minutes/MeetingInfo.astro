@@ -1,0 +1,58 @@
+---
+import type { Minutes } from "@lib/minutes";
+import { MODE_LABEL } from "@lib/minutes";
+import FormattedDate from "@components/FormattedDate.astro";
+
+type Props = { meeting: Minutes };
+
+const { data } = Astro.props.meeting;
+const people = [
+  { label: data.remoteAttendees?.length ? "In person" : "Attendees", names: data.attendees ?? [] },
+  { label: "Online", names: data.remoteAttendees ?? [] },
+].filter((group) => group.names.length > 0);
+const total = people.reduce((sum, group) => sum + group.names.length, 0);
+---
+
+<section
+  aria-label="Meeting details"
+  class="not-prose rounded-lg border border-black/15 text-sm dark:border-white/20"
+>
+  <dl class="grid grid-cols-2 gap-x-4 gap-y-3 p-4 sm:grid-cols-4">
+    <div>
+      <dt class="text-xs text-black/50 dark:text-white/50">Date</dt>
+      <dd class="font-medium text-black dark:text-white"><FormattedDate date={data.date} /></dd>
+    </div>
+    <div>
+      <dt class="text-xs text-black/50 dark:text-white/50">Time</dt>
+      <dd class="font-medium text-black dark:text-white">{data.time ?? "Not recorded"}</dd>
+    </div>
+    <div>
+      <dt class="text-xs text-black/50 dark:text-white/50">Where</dt>
+      <dd class="font-medium text-black dark:text-white">{data.location ?? "Not recorded"}</dd>
+    </div>
+    <div>
+      <dt class="text-xs text-black/50 dark:text-white/50">Format</dt>
+      <dd class="font-medium text-black dark:text-white">{data.mode ? MODE_LABEL[data.mode] : "Not recorded"}</dd>
+    </div>
+  </dl>
+  {
+    people.length > 0 && (
+      <div class="space-y-2 border-t border-black/10 p-4 dark:border-white/10">
+        <div class="text-xs text-black/50 dark:text-white/50">
+          {total} attendee{total === 1 ? "" : "s"}
+          {data.minuteTaker && <> · Minutes by <span class="text-black dark:text-white">{data.minuteTaker}</span></>}
+        </div>
+        {people.map((group) => (
+          <div class="flex flex-wrap items-center gap-1.5">
+            {people.length > 1 && <span class="mr-1 text-xs">{group.label}:</span>}
+            {group.names.map((name) => (
+              <span class="rounded-full border border-black/15 px-2 py-0.5 text-xs dark:border-white/20">
+                {name}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    )
+  }
+</section>

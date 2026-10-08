@@ -1,0 +1,38 @@
+---
+import type { Minutes } from "@lib/minutes";
+import { MODE_LABEL, parseActionItems } from "@lib/minutes";
+
+type Props = { meeting: Minutes };
+
+const { meeting } = Astro.props;
+const { data } = meeting;
+const actions = parseActionItems(meeting);
+const open = actions.filter((item) => !item.done).length;
+const attendeeCount = (data.attendees?.length ?? 0) + (data.remoteAttendees?.length ?? 0);
+const day = data.date.toLocaleDateString("en-US", { day: "2-digit", timeZone: "UTC" });
+const month = data.date.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
+---
+
+<a
+  href={`/blog/${meeting.id}`}
+  class="not-prose group flex gap-4 rounded-lg border border-black/15 px-4 py-3 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+>
+  <div class="flex w-12 shrink-0 flex-col items-center justify-center rounded-md border border-black/10 py-1 text-center dark:border-white/10">
+    <span class="text-[10px] font-semibold uppercase tracking-wider text-secondary">{month}</span>
+    <span class="text-lg font-semibold leading-tight text-black dark:text-white">{day}</span>
+  </div>
+  <div class="min-w-0 flex-1 space-y-1">
+    <div class="font-semibold">{data.title}</div>
+    <div class="text-sm">{data.description}</div>
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5 text-xs text-black/60 dark:text-white/60">
+      {data.mode && <span>{MODE_LABEL[data.mode]}</span>}
+      {attendeeCount > 1 && <span>👥 {attendeeCount}</span>}
+      {actions.length > 0 && (
+        <span>
+          ✅ {actions.length - open}/{actions.length} actions done
+        </span>
+      )}
+      {data.tags?.map((tag) => <span>#{tag}</span>)}
+    </div>
+  </div>
+</a>

@@ -3,15 +3,9 @@ title: "Narrative Design & Audience Outcomes"
 description: "Defining user experiences for makers, community, and the public; discussing event scheduling constraints."
 date: "2026-06-07"
 tags: ["narrative", "audience", "storytelling", "timeline"]
----
-
-## Meeting Details
-
-- **Date:** June 7, 2026
-- **Time:** Not Specified
-- **Location:** Online
-- **Attendees:** Core Committee members (Shan OG, Jazeel, and others)
-
+location: "Online"
+mode: "online"
+attendees: ["Shan OG", "Jazeel", "Other core committee members"]
 ---
 
 ## Agenda

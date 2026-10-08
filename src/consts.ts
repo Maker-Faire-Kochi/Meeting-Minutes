@@ -24,6 +24,16 @@ export const PROJECTS: Metadata = {
     "Key roadmap milestones and targets for Maker Faire Kochi.",
 };
 
+export const WIKI: Metadata = {
+  TITLE: "Wiki",
+  DESCRIPTION:
+    "The Maker Faire Kochi wiki: a living knowledge base of how we plan, fund, run, and communicate the faire.",
+};
+
+// Shown at the top of every wiki page. Set to undefined once real content is in.
+export const WIKI_NOTICE: string | undefined =
+  "Pages here only show the planned structure with a few dummy notes. Real notes from the organizing committee will be added soon.";
+
 export const SOCIALS: Socials = [
   {
     NAME: "Instagram",

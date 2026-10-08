@@ -3,15 +3,9 @@ title: "All-Hands Planning & Partnership Coordination"
 description: "Review of Maker Faire licensing, community curation databases, sponsorship pitch decks, and spatial layout zones."
 date: "2026-05-07"
 tags: ["all-hands", "licensing", "partnership", "sponsorship"]
----
-
-## Meeting Details
-
-- **Date:** May 7, 2026
-- **Time:** Not Specified
-- **Location:** Online (Zoom / Teams)
-- **Attendees:** Core Team (Abhiram, Salman Faris, Jasim CM, Muhammed Jazeel M, Samad, Arundhathi Krishna, and others)
-
+location: "Online (Zoom / Teams)"
+mode: "online"
+attendees: ["Abhiram", "Salman Faris", "Jasim CM", "Muhammed Jazeel M", "Samad", "Arundhathi Krishna", "Other core team members"]
 ---
 
 ## Agenda
