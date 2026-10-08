@@ -3,15 +3,9 @@ title: "Licensing & Sponsorship Structure"
 description: "Decision on the USD 2,500 Maker Faire license tier, drafting sponsorship packages, and assigning marketing duties."
 date: "2026-05-21"
 tags: ["licensing", "sponsorship", "marketing"]
----
-
-## Meeting Details
-
-- **Date:** May 21, 2026
-- **Time:** Not Specified
-- **Location:** Online
-- **Attendees:** Core Committee members
-
+location: "Online"
+mode: "online"
+attendees: ["Core committee members"]
 ---
 
 ## Agenda

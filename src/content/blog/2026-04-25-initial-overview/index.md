@@ -3,15 +3,9 @@ title: "Initial Overview & Event Flow"
 description: "An introductory planning session discussing the high-level vision and event flow for Maker Faire Kochi."
 date: "2026-04-25"
 tags: ["intro", "planning", "event-flow"]
----
-
-## Meeting Details
-
-- **Date:** April 25, 2026
-- **Time:** Not Specified
-- **Location:** Online (Google Doc Sync)
-- **Attendees:** Core Team Members
-
+location: "Online (Google Doc sync)"
+mode: "online"
+attendees: ["Core team members"]
 ---
 
 ## Agenda

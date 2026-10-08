@@ -3,17 +3,12 @@ title: "Timeline Sync & Sponsorship Prep"
 description: "Decision to proceed with October/November dates, budget scaling to a 20-lakh base plan, and sponsorship deck assignments."
 date: "2026-06-11"
 tags: ["timeline", "sponsorship", "budget", "planning"]
----
-
-## Meeting Details
-
-- **Date:** June 11, 2026
-- **Time:** 9:30 PM – 11:00 PM IST
-- **Location:** Hybrid (In-person at Finger Space + Online)
-- **Attendees:** 
-  - *In-person:* Samad, Mithilaj, Salman, Abhiram, Shan (Minute-taker)
-  - *Online:* Jasmine, Jaseel, Johan, SV, Rio, Nayana
-
+time: "9:30 PM – 11:00 PM IST"
+location: "Finger Space + online"
+mode: "hybrid"
+attendees: ["Samad", "Mithilaj", "Salman", "Abhiram", "Shan"]
+remoteAttendees: ["Jasmine", "Jaseel", "Johan", "SV", "Rio", "Nayana"]
+minuteTaker: "Shan"
 ---
 
 ## Agenda
