@@ -5,6 +5,7 @@ import pagefind from "astro-pagefind";
 import tailwindcss from "@tailwindcss/vite";
 
 import cloudflare from "@astrojs/cloudflare";
+import remarkCallouts from "./src/lib/remark-callouts.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
   },
 
   markdown: {
+    remarkPlugins: [remarkCallouts],
     shikiConfig: {
       theme: "css-variables",
     },

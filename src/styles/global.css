@@ -150,3 +150,54 @@ pre {
 .copy-code:active {
   @apply scale-90 transition-transform;
 }
+
+/* callouts: `> [!NOTE]` etc. (see src/lib/remark-callouts.mjs) */
+article .callout {
+  @apply my-6 rounded-lg border-l-4 px-4 py-3;
+  @apply border-sky-500 bg-sky-500/10;
+}
+
+article .callout > :first-child {
+  @apply mt-0;
+}
+
+article .callout > :last-child {
+  @apply mb-0;
+}
+
+article .callout p {
+  @apply my-2;
+}
+
+article .callout .callout-title {
+  @apply mb-1 font-semibold text-black dark:text-white;
+}
+
+article .callout-tip {
+  @apply border-emerald-500 bg-emerald-500/10;
+}
+
+article .callout-important {
+  @apply border-violet-500 bg-violet-500/10;
+}
+
+article .callout-warning {
+  @apply border-amber-500 bg-amber-500/10;
+}
+
+article .callout-caution {
+  @apply border-secondary bg-secondary/10;
+}
+
+/* GFM checklists: the checkbox replaces the bullet */
+article ul.contains-task-list {
+  @apply list-none pl-0;
+}
+
+article ul.contains-task-list ul.contains-task-list {
+  @apply pl-6;
+}
+
+article li.task-list-item > input[type="checkbox"] {
+  @apply mr-2 align-middle;
+}
