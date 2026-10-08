@@ -9,6 +9,16 @@ const blog = defineCollection({
     date: z.coerce.date(),
     draft: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
+    // Meeting details (all optional, shown in the meeting info panel)
+    time: z.string().optional(),
+    location: z.string().optional(),
+    mode: z.enum(["online", "in-person", "hybrid"]).optional(),
+    attendees: z.array(z.string()).optional(),
+    remoteAttendees: z.array(z.string()).optional(),
+    minuteTaker: z.string().optional(),
+    resources: z
+      .array(z.object({ title: z.string(), url: z.string().url() }))
+      .optional(),
   }),
 });
 

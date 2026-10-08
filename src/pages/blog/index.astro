@@ -1,55 +1,192 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
+import MinutesCard from "@components/minutes/MinutesCard.astro";
+import FormattedDate from "@components/FormattedDate.astro";
 import { BLOG } from "@consts";
+import { getMinutes, newMinutesUrl, parseActionItems, MODE_LABEL, type Minutes } from "@lib/minutes";
 
-const data = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = await getMinutes();
+const actions = posts.flatMap(parseActionItems);
+const openActions = actions.filter((item) => !item.done).length;
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
+const tags = [...new Set(posts.flatMap((post) => post.data.tags ?? []))].sort();
+const modes = [...new Set(posts.map((post) => post.data.mode).filter((mode) => mode !== undefined))];
 
-const posts = data.reduce((acc: Acc, post) => {
-  const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
-  return acc;
-}, {});
+const byYear = new Map<string, Minutes[]>();
+for (const post of posts) {
+  const year = post.data.date.getUTCFullYear().toString();
+  byYear.set(year, [...(byYear.get(year) ?? []), post]);
+}
 
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const chipClass =
+  "rounded-sm border border-black/15 px-2 py-0.5 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:aria-pressed:text-white";
+const buttonClass =
+  "rounded-sm border border-black/15 px-2 py-1 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white";
 ---
 
 <Layout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
   <Container>
-    <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="space-y-4">
+    <div class="space-y-10" data-pagefind-ignore>
+      <div class="animate space-y-4">
+        <h1 class="text-3xl font-semibold text-black dark:text-white">Meeting minutes</h1>
+        <p>{BLOG.DESCRIPTION}</p>
+        <dl class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Meetings</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">{posts.length}</dd>
+          </div>
+          <a href="/blog/actions?status=open" class="rounded-lg border border-black/15 px-3 py-2 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5">
+            <dt class="text-xs">Open actions</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">{openActions}<span class="text-sm font-normal"> / {actions.length}</span></dd>
+          </a>
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Latest</dt>
+            <dd class="font-semibold text-black dark:text-white">{posts[0] && <FormattedDate date={posts[0].data.date} />}</dd>
+          </div>
+        </dl>
+        <div class="flex flex-wrap gap-2">
+          <a href="/blog/actions" class={buttonClass}>✅ Action tracker</a>
+          <a href="/tags" class={buttonClass}>🏷️ Tags</a>
+          <a href={newMinutesUrl()} target="_blank" rel="noopener" class={buttonClass}>➕ New minutes</a>
+          <a href="/rss.xml" class={buttonClass}>📡 RSS</a>
+        </div>
+      </div>
+
+      <div class="animate space-y-3" data-minutes-filters>
+        <input
+          type="search"
+          data-filter-query
+          placeholder="Search titles, summaries, attendees…"
+          aria-label="Search minutes"
+          class="w-full rounded-sm border border-black/15 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-black/40 focus:border-primary dark:border-white/20 dark:placeholder:text-white/40"
+        />
+        <div class="flex flex-wrap items-center gap-1.5">
           {
-            years.map((year) => (
-              <section class="animate space-y-4">
-                <div class="font-semibold text-black dark:text-white">
-                  {year}
-                </div>
-                <div>
-                  <ul class="not-prose flex flex-col gap-4">
-                    {posts[year].map((post) => (
-                      <li>
-                        <ArrowCard entry={post} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
+            modes.map((mode) => (
+              <button type="button" data-filter-mode={mode} aria-pressed="false" class={chipClass}>
+                {MODE_LABEL[mode]}
+              </button>
+            ))
+          }
+          {modes.length > 0 && <span class="mx-1 text-black/20 dark:text-white/20">|</span>}
+          {
+            tags.map((tag) => (
+              <button type="button" data-filter-tag={tag} aria-pressed="false" class={chipClass}>
+                #{tag}
+              </button>
             ))
           }
         </div>
+        <div class="flex items-center justify-between text-xs">
+          <span data-filter-count>{posts.length} meetings</span>
+          <button type="button" data-filter-clear hidden class="underline underline-offset-2 hover:text-primary">
+            Clear filters
+          </button>
+        </div>
       </div>
-    </aside>
+
+      <div class="space-y-8">
+        {
+          [...byYear.entries()].map(([year, yearPosts]) => (
+            <section class="animate space-y-4" data-year-group>
+              <h2 class="font-semibold text-black dark:text-white">{year}</h2>
+              <ul class="not-prose flex flex-col gap-3">
+                {yearPosts.map((post) => (
+                  <li
+                    data-minutes-item
+                    data-tags={(post.data.tags ?? []).join(" ")}
+                    data-mode={post.data.mode ?? ""}
+                    data-search={[
+                      post.data.title,
+                      post.data.description,
+                      post.data.location,
+                      ...(post.data.attendees ?? []),
+                      ...(post.data.remoteAttendees ?? []),
+                      ...(post.data.tags ?? []),
+                    ]
+                      .join(" ")
+                      .toLowerCase()}
+                  >
+                    <MinutesCard meeting={post} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+        <p data-filter-empty hidden class="text-sm">No meetings match these filters.</p>
+      </div>
+    </div>
   </Container>
 </Layout>
+
+<script>
+  function setupMinutesFilters() {
+    const root = document.querySelector<HTMLElement>("[data-minutes-filters]");
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = "true";
+
+    const query = root.querySelector<HTMLInputElement>("[data-filter-query]")!;
+    const tagButtons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-filter-tag]"));
+    const modeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-filter-mode]"));
+    const count = root.querySelector<HTMLElement>("[data-filter-count]")!;
+    const clear = root.querySelector<HTMLButtonElement>("[data-filter-clear]")!;
+    const items = Array.from(document.querySelectorAll<HTMLElement>("[data-minutes-item]"));
+    const groups = Array.from(document.querySelectorAll<HTMLElement>("[data-year-group]"));
+    const empty = document.querySelector<HTMLElement>("[data-filter-empty]")!;
+
+    const pressed = (buttons: HTMLButtonElement[], key: "filterTag" | "filterMode") =>
+      buttons.filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.dataset[key]!);
+
+    function apply() {
+      const q = query.value.trim().toLowerCase();
+      const tags = pressed(tagButtons, "filterTag");
+      const modes = pressed(modeButtons, "filterMode");
+      let shown = 0;
+      for (const item of items) {
+        const itemTags = (item.dataset.tags ?? "").split(" ");
+        const visible =
+          (!q || (item.dataset.search ?? "").includes(q)) &&
+          tags.every((tag) => itemTags.includes(tag)) &&
+          (!modes.length || modes.includes(item.dataset.mode ?? ""));
+        item.hidden = !visible;
+        if (visible) shown++;
+      }
+      groups.forEach((group) => (group.hidden = !group.querySelector("[data-minutes-item]:not([hidden])")));
+      empty.hidden = shown > 0;
+      const filtered = !!(q || tags.length || modes.length);
+      count.textContent = filtered ? `${shown} of ${items.length} meetings` : `${items.length} meetings`;
+      clear.hidden = !filtered;
+
+      // Keep filters in the URL so a filtered view can be shared.
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      tags.forEach((tag) => params.append("tag", tag));
+      modes.forEach((mode) => params.append("mode", mode));
+      history.replaceState(history.state, "", params.size ? `?${params}` : location.pathname);
+    }
+
+    const toggle = (button: HTMLButtonElement) => {
+      button.setAttribute("aria-pressed", String(button.getAttribute("aria-pressed") !== "true"));
+      apply();
+    };
+    [...tagButtons, ...modeButtons].forEach((b) => b.addEventListener("click", () => toggle(b)));
+    query.addEventListener("input", apply);
+    clear.addEventListener("click", () => {
+      query.value = "";
+      [...tagButtons, ...modeButtons].forEach((b) => b.setAttribute("aria-pressed", "false"));
+      apply();
+    });
+
+    const params = new URLSearchParams(location.search);
+    query.value = params.get("q") ?? "";
+    const initialTags = params.getAll("tag");
+    const initialModes = params.getAll("mode");
+    tagButtons.forEach((b) => b.setAttribute("aria-pressed", String(initialTags.includes(b.dataset.filterTag!))));
+    modeButtons.forEach((b) => b.setAttribute("aria-pressed", String(initialModes.includes(b.dataset.filterMode!))));
+    apply();
+  }
+
+  document.addEventListener("astro:page-load", setupMinutesFilters);
+</script>

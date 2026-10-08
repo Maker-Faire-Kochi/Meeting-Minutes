@@ -10,7 +10,7 @@ Built with [Astro](https://astro.build/) and customized with our brand color pal
 
 ## 📂 Repository Structure
 
-- **`src/content/blog/`**: Stores the chronological archives of all organizing committee meeting minutes (structured with details, agendas, and action items).
+- **`src/content/blog/`**: Stores the chronological archives of all organizing committee meeting minutes (structured with details, agendas, and action items). Action items are collected automatically on `/blog/actions`.
 - **`src/content/projects/`**: Stores the roadmap milestones leading up to the October/November event dates.
 - **`src/content/wiki/`**: The Maker Faire Kochi **Wiki**, a GitBook-style knowledge base of how the faire is planned and run (served at `/wiki`), with nested sub-pages.
 - **`MINUTES_GUIDE.md`**: Guide for organizing committee volunteers on how to add new meeting logs and keep consistent formatting.

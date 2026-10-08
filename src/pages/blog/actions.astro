@@ -1,0 +1,149 @@
+---
+import Layout from "@layouts/Layout.astro";
+import BackToPrevious from "@components/BackToPrevious.astro";
+import ActionItemList from "@components/minutes/ActionItemList.astro";
+import DocScripts from "@components/DocScripts.astro";
+import { assigneeNames, getMinutes, parseActionItems } from "@lib/minutes";
+
+const posts = await getMinutes();
+// Open items first, then by deadline (soonest first, undated last), then newest meeting.
+const items = posts.flatMap(parseActionItems).sort((a, b) => {
+  if (a.done !== b.done) return a.done ? 1 : -1;
+  if (a.deadline !== b.deadline) {
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+    return a.deadline.localeCompare(b.deadline);
+  }
+  return b.meeting.data.date.valueOf() - a.meeting.data.date.valueOf();
+});
+
+const people = [
+  ...new Map(
+    items.flatMap((item) => assigneeNames(item.assignee)).map((name) => [name.toLowerCase(), name]),
+  ).values(),
+].sort((a, b) => a.localeCompare(b));
+const open = items.filter((item) => !item.done).length;
+
+const selectClass =
+  "rounded-sm border border-black/15 bg-neutral-100 px-2 py-1.5 text-sm outline-none focus:border-primary dark:border-white/20 dark:bg-neutral-900";
+---
+
+<Layout title="Action tracker" description="Every action item from the Maker Faire Kochi meeting minutes in one place.">
+  <div class="mx-auto max-w-3xl px-3">
+    <div class="space-y-8" data-pagefind-ignore>
+      <div class="animate">
+        <BackToPrevious href="/blog">Back to minutes</BackToPrevious>
+      </div>
+
+      <div class="animate space-y-3">
+        <h1 class="text-3xl font-semibold text-black dark:text-white">✅ Action tracker</h1>
+        <p>
+          Every action item from the minutes, collected automatically from each meeting's
+          <em>Action Items</em> section. To close an item, mark it done in the original minutes
+          (tick the checkbox, <code class="rounded-sm bg-black/5 px-1 font-mono text-xs dark:bg-white/10">- [x]</code>, or set the status to <code class="rounded-sm bg-black/5 px-1 font-mono text-xs dark:bg-white/10">Done</code>).
+        </p>
+        <dl class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Open</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">{open}</dd>
+          </div>
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Overdue</dt>
+            <dd class="text-xl font-semibold text-secondary" data-overdue-count>–</dd>
+          </div>
+          <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
+            <dt class="text-xs">Done</dt>
+            <dd class="text-xl font-semibold text-black dark:text-white">{items.length - open}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="animate flex flex-wrap items-center gap-2" data-action-filters>
+        <input
+          type="search"
+          data-filter-query
+          placeholder="Search tasks…"
+          aria-label="Search action items"
+          class="min-w-0 flex-1 rounded-sm border border-black/15 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-black/40 focus:border-primary dark:border-white/20 dark:placeholder:text-white/40"
+        />
+        <select data-filter-status aria-label="Status" class={selectClass}>
+          <option value="open">Open</option>
+          <option value="overdue">Overdue</option>
+          <option value="done">Done</option>
+          <option value="all">All</option>
+        </select>
+        <select data-filter-person aria-label="Assignee" class={selectClass}>
+          <option value="">Everyone</option>
+          {people.map((name) => <option value={name.toLowerCase()}>{name}</option>)}
+        </select>
+      </div>
+
+      <div class="animate space-y-2">
+        <div class="text-xs" data-filter-count></div>
+        <ActionItemList items={items} showMeeting />
+        <p data-filter-empty hidden class="text-sm">No action items match these filters.</p>
+      </div>
+    </div>
+  </div>
+  <DocScripts />
+</Layout>
+
+<script>
+  function setupActionFilters() {
+    const root = document.querySelector<HTMLElement>("[data-action-filters]");
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = "true";
+
+    const query = root.querySelector<HTMLInputElement>("[data-filter-query]")!;
+    const status = root.querySelector<HTMLSelectElement>("[data-filter-status]")!;
+    const person = root.querySelector<HTMLSelectElement>("[data-filter-person]")!;
+    const items = Array.from(document.querySelectorAll<HTMLElement>("[data-action-item]"));
+    const count = document.querySelector<HTMLElement>("[data-filter-count]")!;
+    const empty = document.querySelector<HTMLElement>("[data-filter-empty]")!;
+    const overdueCount = document.querySelector<HTMLElement>("[data-overdue-count]")!;
+
+    function apply() {
+      if (!root!.isConnected) return;
+      const q = query.value.trim().toLowerCase();
+      let shown = 0;
+      for (const item of items) {
+        const done = item.dataset.done === "true";
+        const matchesStatus =
+          status.value === "all" ||
+          (status.value === "open" && !done) ||
+          (status.value === "done" && done) ||
+          (status.value === "overdue" && item.dataset.overdue === "true");
+        const matchesPerson =
+          !person.value || (item.dataset.assignees ?? "").split("|").includes(person.value);
+        const visible = matchesStatus && matchesPerson && (!q || (item.dataset.search ?? "").includes(q));
+        item.hidden = !visible;
+        if (visible) shown++;
+      }
+      count.textContent = `Showing ${shown} of ${items.length} action items`;
+      empty.hidden = shown > 0;
+      overdueCount.textContent = String(items.filter((i) => i.dataset.overdue === "true").length);
+
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (status.value !== "open") params.set("status", status.value);
+      if (person.value) params.set("person", person.value);
+      history.replaceState(history.state, "", params.size ? `?${params}` : location.pathname);
+    }
+
+    const params = new URLSearchParams(location.search);
+    query.value = params.get("q") ?? "";
+    status.value = params.get("status") ?? "open";
+    person.value = params.get("person") ?? "";
+    if (status.selectedIndex === -1) status.value = "open";
+    if (person.selectedIndex === -1) person.value = "";
+
+    query.addEventListener("input", apply);
+    status.addEventListener("change", apply);
+    person.addEventListener("change", apply);
+    // Overdue flags are set by DocScripts on page load; re-apply once they're ready.
+    document.addEventListener("actions:overdue-ready", apply);
+    apply();
+  }
+
+  document.addEventListener("astro:page-load", setupActionFilters);
+</script>

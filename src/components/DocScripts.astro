@@ -125,7 +125,20 @@
     headings.forEach((heading) => observer!.observe(heading));
   }
 
+  // Flags open action items whose deadline has passed (evaluated in the browser so it stays current).
+  function markOverdue() {
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll<HTMLElement>("[data-action-item][data-deadline]").forEach((item) => {
+      const overdue = item.dataset.done === "false" && (item.dataset.deadline ?? "") < today;
+      item.dataset.overdue = String(overdue);
+      const badge = item.querySelector<HTMLElement>("[data-overdue-badge]");
+      if (badge) badge.hidden = !overdue;
+    });
+    document.dispatchEvent(new CustomEvent("actions:overdue-ready"));
+  }
+
   function init() {
+    markOverdue();
     setupSidebars();
     setupHeadingAnchors();
     setupCopyButtons();
