@@ -31,6 +31,11 @@ const projects = defineCollection({
     draft: z.boolean().optional(),
     demoURL: z.string().optional(),
     repoURL: z.string().optional(),
+    // Roadmap tracking (all optional)
+    status: z.enum(["planned", "in-progress", "at-risk", "blocked", "done"]).optional(),
+    owner: z.string().optional(),
+    /** Ids of meeting minutes (folder names under src/content/blog) where this milestone was discussed. */
+    minutes: z.array(z.string()).optional(),
   }),
 });
 

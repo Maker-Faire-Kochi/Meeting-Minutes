@@ -1,12 +1,14 @@
 ---
-import type { WikiNode } from "@lib/wiki";
+type Link = { href: string; title: string };
 
 type Props = {
-  prev?: WikiNode;
-  next?: WikiNode;
+  prev?: Link;
+  next?: Link;
+  /** Labels for the two cards (defaults: Previous / Next). */
+  labels?: [string, string];
 };
 
-const { prev, next } = Astro.props;
+const { prev, next, labels = ["Previous", "Next"] } = Astro.props;
 const cardClass =
   "group relative flex flex-col rounded-lg border border-black/15 px-4 py-3 no-underline transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white";
 ---
@@ -32,7 +34,7 @@ const cardClass =
             class="translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0"
           />
         </svg>
-        <span class="text-xs">Previous</span>
+        <span class="text-xs">{labels[0]}</span>
         <span class="text-sm font-medium">{prev.title}</span>
       </a>
     ) : (
@@ -59,7 +61,7 @@ const cardClass =
             class="-translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0"
           />
         </svg>
-        <span class="text-xs">Next</span>
+        <span class="text-xs">{labels[1]}</span>
         <span class="text-sm font-medium">{next.title}</span>
       </a>
     ) : (

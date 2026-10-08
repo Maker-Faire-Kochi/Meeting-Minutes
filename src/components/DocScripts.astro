@@ -137,7 +137,34 @@
     document.dispatchEvent(new CustomEvent("actions:overdue-ready"));
   }
 
+  // Fills `[data-relative-date="YYYY-MM-DD"]` with text like "in 3 days" or "2 months ago",
+  // and marks `[data-date-state]` elements as past/today/future.
+  function setupRelativeDates() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    const daysFrom = (iso: string) => {
+      const [y, m, d] = iso.split("-").map(Number);
+      return Math.round((new Date(y, m - 1, d).valueOf() - today.valueOf()) / 86_400_000);
+    };
+    document.querySelectorAll<HTMLElement>("[data-relative-date]").forEach((el) => {
+      const days = daysFrom(el.dataset.relativeDate!);
+      const abs = Math.abs(days);
+      el.textContent =
+        abs < 14
+          ? rtf.format(days, "day")
+          : abs < 60
+            ? rtf.format(Math.round(days / 7), "week")
+            : rtf.format(Math.round(days / 30), "month");
+    });
+    document.querySelectorAll<HTMLElement>("[data-date-state]").forEach((el) => {
+      const days = daysFrom(el.dataset.dateState!);
+      el.dataset.when = days < 0 ? "past" : days === 0 ? "today" : "future";
+    });
+  }
+
   function init() {
+    setupRelativeDates();
     markOverdue();
     setupSidebars();
     setupHeadingAnchors();
