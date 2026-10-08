@@ -1,0 +1,37 @@
+---
+import WikiLayout from "@layouts/WikiLayout.astro";
+import WikiBreadcrumbs from "@components/wiki/WikiBreadcrumbs.astro";
+import { buildTagIndex, buildWikiTree, flattenTree, getWikiEntries, tagHref } from "@lib/wiki";
+
+const root = buildWikiTree(await getWikiEntries());
+const tags = buildTagIndex(flattenTree(root));
+---
+
+<WikiLayout
+  title="Wiki tags"
+  description="Browse Maker Faire Kochi wiki pages by tag."
+  root={root}
+  activeKey="@tags"
+>
+  <div class="animate space-y-3">
+    <WikiBreadcrumbs trail={[root, { ...root, title: "Tags", entry: undefined }]} />
+    <h1 class="text-3xl font-semibold text-black dark:text-white">🏷️ Tags</h1>
+    <p>{tags.size} tags. Pick one to see every page that uses it.</p>
+  </div>
+
+  <ul class="animate mt-8 flex flex-wrap gap-2">
+    {
+      [...tags.entries()].map(([tag, pages]) => (
+        <li>
+          <a
+            href={tagHref(tag)}
+            class="inline-flex items-center gap-1.5 rounded-sm border border-black/15 px-2.5 py-1 text-sm transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            #{tag}
+            <span class="text-xs text-black/50 dark:text-white/50">{pages.length}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</WikiLayout>

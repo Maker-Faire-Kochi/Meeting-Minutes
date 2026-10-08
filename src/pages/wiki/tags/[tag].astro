@@ -1,0 +1,42 @@
+---
+import WikiLayout from "@layouts/WikiLayout.astro";
+import WikiBreadcrumbs from "@components/wiki/WikiBreadcrumbs.astro";
+import WikiPageList from "@components/wiki/WikiPageList.astro";
+import { buildTagIndex, buildWikiTree, flattenTree, getWikiEntries, type WikiNode } from "@lib/wiki";
+
+export async function getStaticPaths() {
+  const root = buildWikiTree(await getWikiEntries());
+  const tags = buildTagIndex(flattenTree(root));
+  return [...tags.entries()].map(([tag, pages]) => ({
+    params: { tag },
+    props: { tag, pages, root },
+  }));
+}
+
+type Props = { tag: string; pages: WikiNode[]; root: WikiNode };
+
+const { tag, pages, root } = Astro.props;
+---
+
+<WikiLayout
+  title={`#${tag} | Wiki`}
+  description={`Wiki pages tagged "${tag}".`}
+  root={root}
+  activeKey="@tags"
+>
+  <div class="animate space-y-3">
+    <WikiBreadcrumbs
+      trail={[
+        root,
+        { ...root, title: "Tags", href: "/wiki/tags" },
+        { ...root, title: `#${tag}`, entry: undefined },
+      ]}
+    />
+    <h1 class="text-3xl font-semibold text-black dark:text-white">#{tag}</h1>
+    <p>{pages.length} page{pages.length > 1 ? "s" : ""} tagged “{tag}”.</p>
+  </div>
+
+  <div class="animate mt-8">
+    <WikiPageList pages={pages} meta />
+  </div>
+</WikiLayout>

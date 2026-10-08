@@ -1,0 +1,241 @@
+---
+import { render } from "astro:content";
+import WikiLayout from "@layouts/WikiLayout.astro";
+import WikiBreadcrumbs from "@components/wiki/WikiBreadcrumbs.astro";
+import WikiPrevNext from "@components/wiki/WikiPrevNext.astro";
+import WikiToc from "@components/wiki/WikiToc.astro";
+import WikiPageList from "@components/wiki/WikiPageList.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+import Giscus from "@components/Giscus.astro";
+import { WIKI } from "@consts";
+import { readingTime } from "@lib/utils";
+import {
+  STATUS_META,
+  buildBacklinks,
+  buildWikiTree,
+  editUrl,
+  findNode,
+  flattenTree,
+  getTrail,
+  getWikiEntries,
+  historyUrl,
+  keyFor,
+  newSubPageUrl,
+  recentlyUpdated,
+  slugFor,
+  tagHref,
+  visibleChildren,
+  type WikiEntry,
+} from "@lib/wiki";
+
+export async function getStaticPaths() {
+  const entries = await getWikiEntries();
+  return entries.map((entry) => ({
+    params: { slug: slugFor(entry.id) || undefined },
+    props: { entry },
+  }));
+}
+
+type Props = { entry: WikiEntry };
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const data = entry.data;
+
+const root = buildWikiTree(await getWikiEntries());
+const key = keyFor(entry.id);
+const node = findNode(root, key)!;
+const trail = getTrail(node);
+const isHome = key === "";
+
+const pages = flattenTree(root);
+const allPages = flattenTree(root, { includeHidden: true });
+const index = pages.findIndex((page) => page.key === key);
+const prev = index >= 0 ? pages[index - 1] : undefined;
+const next = index >= 0 ? pages[index + 1] : undefined;
+
+const children = visibleChildren(node);
+const backlinks = buildBacklinks(allPages).get(node.href) ?? [];
+const related = (data.related ?? [])
+  .map((slug) => allPages.find((page) => page.slug === slug.replace(/^\/?(wiki\/)?|\/$/g, "")))
+  .filter((page) => page !== undefined);
+const recent = isHome ? recentlyUpdated(pages.filter((page) => page !== node), 6) : [];
+const sectionCount = visibleChildren(root).length;
+
+const status = data.status && data.status !== "stable" ? STATUS_META[data.status] : undefined;
+const edit = editUrl(entry);
+const history = historyUrl(entry);
+const actionClass =
+  "rounded-sm border border-black/15 px-2 py-1 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white";
+---
+
+<WikiLayout
+  title={isHome ? WIKI.TITLE : data.title}
+  description={data.description ?? WIKI.DESCRIPTION}
+  root={root}
+  activeKey={key}
+  headings={headings}
+>
+  <div class="animate space-y-3">
+    {trail.length > 1 && <WikiBreadcrumbs trail={trail} />}
+    <h1 class="flex items-center gap-2 text-3xl font-semibold text-black dark:text-white">
+      {node.icon && <span aria-hidden="true">{node.icon}</span>}
+      {data.title}
+    </h1>
+    {data.description && <p class="text-base">{data.description}</p>}
+    <div data-pagefind-ignore class="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 text-sm">
+      {
+        data.status && (
+          <span class="rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-black dark:text-white">
+            {STATUS_META[data.status].label}
+          </span>
+        )
+      }
+      {data.owner && <span>👤 {data.owner}</span>}
+      {entry.body && <span>{readingTime(entry.body)}</span>}
+      {
+        data.lastUpdated && (
+          <span>
+            Updated <FormattedDate date={data.lastUpdated} />
+          </span>
+        )
+      }
+      {
+        data.tags?.map((tag) => (
+          <a
+            href={tagHref(tag)}
+            class="rounded-sm border border-black/15 px-2 py-0.5 text-xs transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            #{tag}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  {
+    status && status.message && (
+      <div
+        data-pagefind-ignore
+        class="animate mt-6 rounded-lg border-l-4 border-amber-500 bg-amber-500/10 px-4 py-3 text-sm"
+      >
+        <strong class="text-black dark:text-white">{status.label}:</strong> {status.message}
+        {edit && (
+          <>
+            {" "}
+            <a href={edit} target="_blank" rel="noopener" class="underline underline-offset-2 hover:text-primary">
+              Edit this page
+            </a>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  {
+    headings.length > 0 && (
+      <details
+        data-pagefind-ignore
+        class="no-print animate group mt-8 rounded-lg border border-black/15 xl:hidden dark:border-white/20"
+      >
+        <summary class="cursor-pointer rounded-t-lg px-3 py-1.5 font-medium transition-colors group-open:bg-black/5 hover:bg-black/5 dark:group-open:bg-white/5 hover:dark:bg-white/5">
+          On this page
+        </summary>
+        <div class="p-3">
+          <WikiToc headings={headings} title={false} />
+        </div>
+      </details>
+    )
+  }
+
+  <article class="doc-content animate mt-8">
+    <Content />
+  </article>
+
+  {
+    children.length > 0 && (
+      <section data-pagefind-ignore class="animate mt-12 space-y-4">
+        <h2 class="font-semibold text-black dark:text-white">
+          {isHome ? `Sections (${sectionCount})` : `Sub-pages (${children.length})`}
+        </h2>
+        <WikiPageList pages={children} />
+      </section>
+    )
+  }
+
+  {
+    isHome && recent.length > 0 && (
+      <section data-pagefind-ignore class="animate mt-12 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="font-semibold text-black dark:text-white">Recently updated</h2>
+          <a href="/wiki/all" class="text-sm underline underline-offset-[3px] hover:text-primary">
+            All {pages.length} pages →
+          </a>
+        </div>
+        <WikiPageList pages={recent} meta />
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section data-pagefind-ignore class="animate mt-12 space-y-4">
+        <h2 class="font-semibold text-black dark:text-white">Related pages</h2>
+        <WikiPageList pages={related} />
+      </section>
+    )
+  }
+
+  {
+    backlinks.length > 0 && (
+      <section data-pagefind-ignore class="animate mt-12 space-y-3">
+        <h2 class="font-semibold text-black dark:text-white">Linked from</h2>
+        <ul class="flex flex-wrap gap-2 text-sm">
+          {backlinks.map((page) => (
+            <li>
+              <a
+                href={page.href}
+                class="inline-flex items-center gap-1 rounded-sm border border-black/15 px-2 py-1 transition-colors hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white"
+              >
+                ↩ {page.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <div
+    data-pagefind-ignore
+    class="no-print animate mt-16 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 text-sm dark:border-white/10"
+  >
+    {
+      edit && (
+        <a href={edit} target="_blank" rel="noopener" class={actionClass}>
+          ✏️ Edit page
+        </a>
+      )
+    }
+    <a href={newSubPageUrl(entry)} target="_blank" rel="noopener" class={actionClass}>
+      ➕ New sub-page
+    </a>
+    {
+      history && (
+        <a href={history} target="_blank" rel="noopener" class={actionClass}>
+          🕘 History
+        </a>
+      )
+    }
+    <button type="button" data-copy-url class={actionClass}>🔗 Copy link</button>
+    <button type="button" onclick="window.print()" class={actionClass}>🖨️ Print</button>
+  </div>
+
+  <div class="no-print animate mt-8">
+    <WikiPrevNext prev={prev} next={next} />
+  </div>
+
+  <div class="no-print mt-16">
+    <Giscus />
+  </div>
+</WikiLayout>

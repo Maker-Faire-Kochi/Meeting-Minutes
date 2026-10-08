@@ -1,0 +1,11 @@
+---
+title: "Volunteer Training"
+navTitle: "Training"
+description: "Placeholder: a sample sub-page."
+order: 2
+lastUpdated: "2026-10-08"
+---
+
+## Notes
+
+- Placeholder note about training.

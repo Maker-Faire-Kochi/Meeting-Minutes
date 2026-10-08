@@ -1,0 +1,69 @@
+---
+import type { WikiNode } from "@lib/wiki";
+import { isInBranch, visibleChildren } from "@lib/wiki";
+import { cn } from "@lib/utils";
+
+type Props = {
+  node: WikiNode;
+  activeKey: string;
+  /** Overrides the label, e.g. "Overview" for a section's own page. */
+  label?: string;
+  /** Render as a leaf even if the node has children. */
+  leaf?: boolean;
+};
+
+const { node, activeKey, label, leaf = false } = Astro.props;
+const children = leaf ? [] : visibleChildren(node);
+const isActive = node.key === activeKey;
+const text = label ?? node.navTitle;
+// A section's "Overview" entry sits under the section heading, which already shows the icon.
+const icon = label ? undefined : node.icon;
+const searchText = `${text} ${node.title}`.toLowerCase();
+const linkClass = cn(
+  "flex min-w-0 flex-1 items-center gap-1.5 rounded-sm border-l-2 py-1 pl-3 pr-2 text-sm transition-colors duration-300 ease-in-out",
+  isActive
+    ? "border-primary bg-primary/10 font-medium text-black dark:text-white"
+    : "border-transparent hover:border-black/20 hover:text-black dark:hover:border-white/20 dark:hover:text-white",
+);
+---
+
+<li data-wiki-item data-search={searchText}>
+  {
+    children.length > 0 ? (
+      <details open={isInBranch(node, activeKey)} data-default-open={isInBranch(node, activeKey) ? "" : undefined} class="group/item">
+        <summary class="flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden">
+          {node.entry ? (
+            <a href={node.href} class={linkClass} aria-current={isActive ? "page" : undefined}>
+              {icon && <span aria-hidden="true">{icon}</span>}
+              <span class="truncate">{text}</span>
+            </a>
+          ) : (
+            <span class="flex flex-1 items-center gap-1.5 py-1 pl-3 text-sm">
+              {icon && <span aria-hidden="true">{icon}</span>}
+              {text}
+            </span>
+          )}
+          <span class="rounded-sm p-0.5 hover:bg-black/5 dark:hover:bg-white/5" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="size-4 shrink-0 fill-none stroke-current stroke-2 transition-transform duration-200 group-open/item:rotate-90"
+            >
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </span>
+        </summary>
+        <ul class="ml-3 space-y-0.5 border-l border-black/10 pl-1 dark:border-white/10">
+          {children.map((child) => (
+            <Astro.self node={child} activeKey={activeKey} />
+          ))}
+        </ul>
+      </details>
+    ) : (
+      <a href={node.href} class={linkClass} aria-current={isActive ? "page" : undefined}>
+        {icon && <span aria-hidden="true">{icon}</span>}
+        <span class="truncate">{text}</span>
+      </a>
+    )
+  }
+</li>

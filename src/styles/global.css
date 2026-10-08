@@ -189,6 +189,49 @@ article .callout-caution {
   @apply border-secondary bg-secondary/10;
 }
 
+/* heading anchors on wiki pages and minutes (added client-side) */
+.doc-content :is(h2, h3, h4) {
+  @apply relative;
+}
+
+.doc-content .heading-anchor {
+  @apply ml-2 text-black/30 no-underline opacity-0 transition-opacity dark:text-white/30;
+}
+
+.doc-content :is(h2, h3, h4):hover .heading-anchor,
+.doc-content .heading-anchor:focus-visible {
+  @apply opacity-100;
+}
+
+.doc-content .heading-anchor:hover {
+  @apply text-primary;
+}
+
+/* active entry in "On this page" lists */
+[data-toc-link].active {
+  @apply font-medium text-primary;
+}
+
+@media print {
+  header,
+  footer,
+  .no-print,
+  .giscus,
+  #back-to-top {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .animate {
+    opacity: 1 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
 /* GFM checklists: the checkbox replaces the bullet */
 article ul.contains-task-list {
   @apply list-none pl-0;

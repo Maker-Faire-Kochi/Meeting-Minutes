@@ -1,0 +1,59 @@
+---
+import type { WikiNode } from "@lib/wiki";
+import { STATUS_META, sectionOf } from "@lib/wiki";
+import FormattedDate from "@components/FormattedDate.astro";
+import { cn } from "@lib/utils";
+
+type Props = {
+  pages: WikiNode[];
+  /** Show the section, status and last-updated meta line. */
+  meta?: boolean;
+  columns?: 1 | 2;
+};
+
+const { pages, meta = false, columns = 2 } = Astro.props;
+---
+
+<ul class={cn("not-prose grid gap-3", columns === 2 && "sm:grid-cols-2")}>
+  {
+    pages.map((page) => {
+      const section = sectionOf(page);
+      const status = page.entry?.data.status;
+      const href = page.entry ? page.href : (page.children[0]?.href ?? page.href);
+      return (
+        <li>
+          <a
+            href={href}
+            class="group flex h-full flex-col gap-0.5 rounded-lg border border-black/15 px-4 py-3 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+          >
+            <span class="flex items-center gap-1.5 font-semibold">
+              {page.icon && <span aria-hidden="true">{page.icon}</span>}
+              {page.title}
+              {page.children.length > 0 && (
+                <span class="text-xs font-normal text-black/50 dark:text-white/50">
+                  · {page.children.length} sub-page{page.children.length > 1 ? "s" : ""}
+                </span>
+              )}
+            </span>
+            {page.entry?.data.description && <span class="text-sm">{page.entry.data.description}</span>}
+            {meta && (
+              <span class="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-black/50 dark:text-white/50">
+                {section && section !== page && <span>{section.title}</span>}
+                {status && status !== "stable" && (
+                  <span class="rounded-sm border border-black/15 px-1 dark:border-white/20">
+                    {STATUS_META[status].label}
+                  </span>
+                )}
+                {page.entry?.data.lastUpdated && (
+                  <span>
+                    Updated <FormattedDate date={page.entry.data.lastUpdated} />
+                  </span>
+                )}
+              </span>
+            )}
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>

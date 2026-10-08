@@ -1,0 +1,136 @@
+<script>
+  function setupSidebars() {
+    document.querySelectorAll<HTMLElement>("[data-wiki-sidebar]").forEach((sidebar) => {
+      if (sidebar.dataset.ready) return;
+      sidebar.dataset.ready = "true";
+
+      const items = Array.from(sidebar.querySelectorAll<HTMLElement>("[data-wiki-item]"));
+      const sections = Array.from(sidebar.querySelectorAll<HTMLElement>("[data-wiki-section]"));
+      const details = Array.from(sidebar.querySelectorAll<HTMLDetailsElement>("details"));
+      const empty = sidebar.querySelector<HTMLElement>("[data-wiki-filter-empty]");
+      const input = sidebar.querySelector<HTMLInputElement>("[data-wiki-filter]");
+
+      input?.addEventListener("input", () => {
+        const query = input.value.trim().toLowerCase();
+
+        // Children come after their parents in DOM order, so walk backwards to
+        // decide on descendants first: a parent stays visible if any child matches.
+        for (const item of [...items].reverse()) {
+          if (!query) {
+            item.hidden = false;
+            continue;
+          }
+          const ownMatch = (item.dataset.search ?? "").includes(query);
+          const childMatch = item.querySelector(":scope > details > ul > li:not([hidden])");
+          item.hidden = !(ownMatch || childMatch);
+        }
+        for (const d of details) {
+          d.open = query ? true : d.hasAttribute("data-default-open");
+        }
+        let anyVisible = false;
+        for (const section of sections) {
+          const visible = !!section.querySelector("[data-wiki-item]:not([hidden])");
+          section.hidden = !!query && !visible;
+          anyVisible ||= visible;
+        }
+        if (empty) empty.hidden = !query || anyVisible;
+      });
+
+      sidebar.querySelectorAll<HTMLButtonElement>("[data-wiki-expand]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const open = button.dataset.wikiExpand === "all";
+          details.forEach((d) => (d.open = open));
+        });
+      });
+
+      // Keep the active page visible inside the scrollable desktop sidebar.
+      const scroller = sidebar.closest<HTMLElement>("[data-wiki-scroll]");
+      const active = sidebar.querySelector<HTMLElement>("[aria-current='page']");
+      if (scroller && active) {
+        const offset = active.offsetTop - scroller.offsetTop;
+        if (offset > scroller.clientHeight - 80) {
+          scroller.scrollTop = offset - scroller.clientHeight / 2;
+        }
+      }
+    });
+  }
+
+  function copyToClipboard(text: string, button: HTMLElement, done = "Copied!") {
+    navigator.clipboard?.writeText(text).then(() => {
+      const original = button.dataset.label ?? button.textContent ?? "";
+      button.dataset.label = original;
+      button.textContent = done;
+      setTimeout(() => (button.textContent = original), 1500);
+    });
+  }
+
+  function setupHeadingAnchors() {
+    document
+      .querySelectorAll<HTMLElement>(".doc-content :is(h2, h3, h4)[id]")
+      .forEach((heading) => {
+        if (heading.querySelector(".heading-anchor")) return;
+        const anchor = document.createElement("a");
+        anchor.href = `#${heading.id}`;
+        anchor.className = "heading-anchor";
+        anchor.textContent = "#";
+        anchor.setAttribute("aria-label", `Copy link to "${heading.textContent}"`);
+        anchor.addEventListener("click", (event) => {
+          event.preventDefault();
+          const url = `${location.origin}${location.pathname}#${heading.id}`;
+          history.replaceState(null, "", `#${heading.id}`);
+          heading.scrollIntoView({ behavior: "smooth" });
+          copyToClipboard(url, anchor, "✓");
+        });
+        heading.appendChild(anchor);
+      });
+  }
+
+  function setupCopyButtons() {
+    document.querySelectorAll<HTMLButtonElement>("[data-copy-url]").forEach((button) => {
+      if (button.dataset.ready) return;
+      button.dataset.ready = "true";
+      button.addEventListener("click", () =>
+        copyToClipboard(`${location.origin}${location.pathname}`, button),
+      );
+    });
+  }
+
+  let observer: IntersectionObserver | undefined;
+
+  function setupScrollSpy() {
+    observer?.disconnect();
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>(".doc-content :is(h2, h3)[id]"),
+    );
+    if (!headings.length || !document.querySelector("[data-toc-link]")) return;
+
+    const visible = new Set<string>();
+    const setActive = (id: string) => {
+      document.querySelectorAll<HTMLElement>("[data-toc-link]").forEach((link) => {
+        link.classList.toggle("active", link.dataset.tocLink === id);
+      });
+    };
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+        const current = headings.find((h) => visible.has(h.id));
+        if (current) setActive(current.id);
+      },
+      { rootMargin: "-100px 0px -60% 0px" },
+    );
+    headings.forEach((heading) => observer!.observe(heading));
+  }
+
+  function init() {
+    setupSidebars();
+    setupHeadingAnchors();
+    setupCopyButtons();
+    setupScrollSpy();
+  }
+
+  document.addEventListener("astro:page-load", init);
+</script>

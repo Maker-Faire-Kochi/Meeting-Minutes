@@ -1,0 +1,80 @@
+---
+import type { WikiNode } from "@lib/wiki";
+import { visibleChildren } from "@lib/wiki";
+import WikiSidebarItem from "./WikiSidebarItem.astro";
+import { cn } from "@lib/utils";
+
+type Props = {
+  root: WikiNode;
+  activeKey: string;
+};
+
+const { root, activeKey } = Astro.props;
+const navLink = (active: boolean) =>
+  cn(
+    "flex items-center gap-1.5 rounded-sm border-l-2 py-1 pl-3 transition-colors duration-300 ease-in-out",
+    active
+      ? "border-primary bg-primary/10 font-medium text-black dark:text-white"
+      : "border-transparent hover:text-black dark:hover:text-white",
+  );
+---
+
+<div data-wiki-sidebar class="space-y-5 text-sm">
+  <div class="space-y-2">
+    <input
+      type="search"
+      data-wiki-filter
+      placeholder="Filter pages…"
+      aria-label="Filter wiki pages"
+      class="w-full rounded-sm border border-black/15 bg-transparent px-2.5 py-1.5 text-sm outline-none placeholder:text-black/40 focus:border-primary dark:border-white/20 dark:placeholder:text-white/40"
+    />
+    <div class="flex items-center justify-between px-1 text-xs text-black/50 dark:text-white/50">
+      <button type="button" data-wiki-expand="all" class="hover:text-primary">Expand all</button>
+      <button type="button" data-wiki-expand="none" class="hover:text-primary">Collapse all</button>
+    </div>
+    <p data-wiki-filter-empty hidden class="px-3 text-xs">No pages match.</p>
+  </div>
+
+  <ul class="space-y-0.5">
+    <li>
+      <a href={root.href} class={navLink(activeKey === "")} aria-current={activeKey === "" ? "page" : undefined}>
+        🏠 Wiki home
+      </a>
+    </li>
+    <li>
+      <a href="/wiki/all" class={navLink(activeKey === "@all")} aria-current={activeKey === "@all" ? "page" : undefined}>
+        📚 All pages
+      </a>
+    </li>
+    <li>
+      <a href="/wiki/tags" class={navLink(activeKey === "@tags")} aria-current={activeKey === "@tags" ? "page" : undefined}>
+        🏷️ Tags
+      </a>
+    </li>
+  </ul>
+
+  {
+    visibleChildren(root).map((section) => (
+      <div data-wiki-section class="space-y-1">
+        <div class="flex items-center gap-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-black/50 dark:text-white/50">
+          {section.icon && <span aria-hidden="true">{section.icon}</span>}
+          {section.entry ? (
+            <a href={section.href} class="hover:text-primary">
+              {section.navTitle}
+            </a>
+          ) : (
+            section.navTitle
+          )}
+        </div>
+        <ul class="space-y-0.5">
+          {section.entry && (
+            <WikiSidebarItem node={section} label="Overview" leaf activeKey={activeKey} />
+          )}
+          {visibleChildren(section).map((child) => (
+            <WikiSidebarItem node={child} activeKey={activeKey} />
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</div>

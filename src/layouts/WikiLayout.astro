@@ -1,0 +1,71 @@
+---
+import type { MarkdownHeading } from "astro";
+import Layout from "@layouts/Layout.astro";
+import WikiSidebar from "@components/wiki/WikiSidebar.astro";
+import WikiToc from "@components/wiki/WikiToc.astro";
+import DocScripts from "@components/DocScripts.astro";
+import type { WikiNode } from "@lib/wiki";
+import { WIKI_NOTICE } from "@consts";
+
+type Props = {
+  title: string;
+  description: string;
+  root: WikiNode;
+  /** Key of the current page, or "@all" / "@tags" for the generated index pages. */
+  activeKey: string;
+  headings?: MarkdownHeading[];
+};
+
+const { title, description, root, activeKey, headings = [] } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="mx-auto max-w-7xl px-3">
+    <div
+      class="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[16rem_minmax(0,1fr)_13rem]"
+    >
+      <aside data-pagefind-ignore class="no-print lg:hidden">
+        <details class="group rounded-lg border border-black/15 dark:border-white/20">
+          <summary
+            class="cursor-pointer rounded-t-lg px-3 py-1.5 font-medium transition-colors group-open:bg-black/5 hover:bg-black/5 dark:group-open:bg-white/5 hover:dark:bg-white/5"
+          >
+            Wiki menu
+          </summary>
+          <div class="p-3">
+            <WikiSidebar root={root} activeKey={activeKey} />
+          </div>
+        </details>
+      </aside>
+
+      <aside data-pagefind-ignore class="no-print hidden lg:block">
+        <div data-wiki-scroll class="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8 pr-2">
+          <WikiSidebar root={root} activeKey={activeKey} />
+        </div>
+      </aside>
+
+      <div class="min-w-0">
+        <div class="mx-auto max-w-3xl">
+          {
+            WIKI_NOTICE && (
+              <div
+                data-pagefind-ignore
+                role="note"
+                class="mb-8 rounded-lg border border-dashed border-amber-500/60 bg-amber-500/10 px-4 py-3 text-sm"
+              >
+                <strong class="text-black dark:text-white">🚧 Placeholder content:</strong> {WIKI_NOTICE}
+              </div>
+            )
+          }
+          <slot />
+        </div>
+      </div>
+
+      <aside data-pagefind-ignore class="no-print hidden xl:block">
+        <div class="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <WikiToc headings={headings} />
+        </div>
+      </aside>
+    </div>
+  </div>
+  <DocScripts />
+</Layout>
