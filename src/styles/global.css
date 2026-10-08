@@ -244,3 +244,24 @@ article ul.contains-task-list ul.contains-task-list {
 article li.task-list-item > input[type="checkbox"] {
   @apply mr-2 align-middle;
 }
+
+/* search dialog (src/components/Search.astro) */
+.search-excerpt mark,
+mark.pagefind-highlight {
+  @apply rounded-sm bg-primary/25 px-0.5 text-black dark:text-white;
+}
+
+.search-kbd {
+  @apply mr-0.5 rounded-sm border border-black/15 px-1 font-sans dark:border-white/20;
+}
+
+#search-dialog[open] {
+  animation: search-in 120ms ease-out;
+}
+
+@keyframes search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}

@@ -7,6 +7,7 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import Giscus from "@components/Giscus.astro";
 import DocScripts from "@components/DocScripts.astro";
+import SearchMeta from "@components/SearchMeta.astro";
 import WikiPrevNext from "@components/wiki/WikiPrevNext.astro";
 import MinutesCard from "@components/minutes/MinutesCard.astro";
 import StatusBadge from "@components/milestones/StatusBadge.astro";
@@ -18,6 +19,8 @@ import {
   linkedMinutes,
   milestoneEditUrl,
   milestoneHistoryUrl,
+  STATUS_META,
+  statusOf,
 } from "@lib/milestones";
 
 export async function getStaticPaths() {
@@ -56,6 +59,12 @@ const actionClass =
       <span class="text-sm">Milestone {index + 1} of {milestones.length}</span>
     </div>
 
+    <div data-pagefind-body>
+    <SearchMeta
+      type="Milestones"
+      date={data.date}
+      context={[STATUS_META[statusOf(milestone)].label, data.owner].filter(Boolean).join(" · ")}
+    />
     <div class="my-10 space-y-3">
       <div class="animate flex flex-wrap items-center gap-2 text-sm" data-pagefind-ignore>
         <StatusBadge milestone={milestone} />
@@ -67,7 +76,7 @@ const actionClass =
       <p class="animate">{data.description}</p>
       {
         (data.demoURL || data.repoURL) && (
-          <div class="animate flex flex-wrap gap-2 pt-1 text-sm">
+          <div class="animate flex flex-wrap gap-2 pt-1 text-sm" data-pagefind-ignore>
             {data.demoURL && (
               <a href={data.demoURL} target="_blank" rel="noopener" class={actionClass}>
                 🔗 Link
@@ -95,12 +104,14 @@ const actionClass =
           </div>
         )
       }
-      {headings.length > 0 && <TableOfContents headings={headings} />}
+      {headings.length > 0 && <div data-pagefind-ignore><TableOfContents headings={headings} /></div>}
     </div>
 
     <article class="doc-content animate mt-8">
       <Content />
     </article>
+
+    </div>
 
     {
       meetings.length > 0 && (

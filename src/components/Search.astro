@@ -1,0 +1,456 @@
+---
+// Site-wide search dialog built on the Pagefind JS API (index generated at build time by
+// astro-pagefind). Pages opt in to the index with `data-pagefind-body` and describe
+// themselves with <SearchMeta /> (type filter, date, section).
+const TYPES = ["Minutes", "Wiki", "Milestones"];
+const QUICK_LINKS = [
+  { href: "/blog", label: "📝 All minutes" },
+  { href: "/blog/actions", label: "✅ Action tracker" },
+  { href: "/wiki", label: "📚 Wiki" },
+  { href: "/projects", label: "🎯 Roadmap" },
+];
+const chip =
+  "rounded-sm border border-black/15 px-2 py-0.5 text-xs transition-colors hover:bg-black/5 hover:text-black aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:aria-pressed:text-white";
+---
+
+<dialog
+  id="search-dialog"
+  transition:persist="search-dialog"
+  data-pagefind-ignore
+  aria-label="Search"
+  class="no-print m-0 mx-auto mt-[8vh] w-[calc(100%-2rem)] max-w-2xl overflow-hidden rounded-lg border border-black/15 bg-neutral-100 p-0 text-black/75 shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-xs dark:border-white/20 dark:bg-neutral-900 dark:text-white/75"
+>
+  <div class="flex max-h-[80vh] flex-col">
+    <div class="flex items-center gap-2 border-b border-black/10 px-4 dark:border-white/10">
+      <svg viewBox="0 0 16 16" class="size-4 shrink-0 fill-current opacity-60" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          d="M3.5 7a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0Zm6.47 4.03A5 5 0 1 1 11.03 9.97l3 3 .53.53-1.06 1.06-.53-.53-3-3Z"
+        ></path>
+      </svg>
+      <input
+        id="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Search minutes, wiki and milestones…"
+        aria-label="Search"
+        aria-controls="search-results"
+        aria-autocomplete="list"
+        class="h-12 w-full bg-transparent text-base text-black outline-none placeholder:text-black/40 dark:text-white dark:placeholder:text-white/40"
+      />
+      <kbd class="hidden rounded-sm border border-black/15 px-1.5 text-[10px] sm:inline dark:border-white/20">Esc</kbd>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1.5 border-b border-black/10 px-4 py-2 dark:border-white/10">
+      <button type="button" data-search-type="" aria-pressed="true" class={chip}>
+        All <span data-type-count></span>
+      </button>
+      {
+        TYPES.map((type) => (
+          <button type="button" data-search-type={type} aria-pressed="false" class={chip}>
+            {type} <span data-type-count />
+          </button>
+        ))
+      }
+      <label class="ml-auto flex items-center gap-1.5 text-xs">
+        Sort
+        <select
+          id="search-sort"
+          class="rounded-sm border border-black/15 bg-transparent px-1 py-0.5 text-xs outline-none dark:border-white/20 dark:bg-neutral-900"
+        >
+          <option value="relevance">Best match</option>
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2" id="search-body">
+      <div id="search-empty-state" class="space-y-4 px-2 py-2 text-sm">
+        <div id="search-recent-wrap" hidden>
+          <div class="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-black/50 dark:text-white/50">
+            Recent searches
+            <button type="button" id="search-recent-clear" class="font-normal normal-case tracking-normal hover:text-primary">
+              Clear
+            </button>
+          </div>
+          <div id="search-recent" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <div>
+          <div class="mb-2 text-xs font-semibold uppercase tracking-wider text-black/50 dark:text-white/50">
+            Jump to
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            {
+              QUICK_LINKS.map((link) => (
+                <a href={link.href} data-search-close class={chip}>
+                  {link.label}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+        <p class="text-xs">
+          Tip: search for people, places or topics. Use the tabs to narrow down to minutes, wiki pages or milestones.
+        </p>
+      </div>
+      <p id="search-status" class="px-2 py-1 text-xs" aria-live="polite"></p>
+      <ul id="search-results" role="listbox" aria-label="Search results" class="space-y-1"></ul>
+      <div class="px-2 py-2">
+        <button
+          type="button"
+          id="search-more"
+          hidden
+          class="w-full rounded-sm border border-black/15 py-1.5 text-sm transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          Show more results
+        </button>
+      </div>
+    </div>
+
+    <div class="hidden items-center gap-4 border-t border-black/10 px-4 py-2 text-[11px] sm:flex dark:border-white/10">
+      <span><kbd class="search-kbd">↑</kbd><kbd class="search-kbd">↓</kbd> navigate</span>
+      <span><kbd class="search-kbd">↵</kbd> open</span>
+      <span><kbd class="search-kbd">⌘</kbd><kbd class="search-kbd">K</kbd> or <kbd class="search-kbd">/</kbd> search</span>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { navigate } from "astro:transitions/client";
+
+  type PagefindResultData = {
+    url: string;
+    excerpt: string;
+    meta: Record<string, string | undefined>;
+    filters: Record<string, string[]>;
+    sub_results?: { title: string; url: string; excerpt: string }[];
+  };
+  type PagefindSearch = {
+    results: { id: string; data: () => Promise<PagefindResultData> }[];
+    totalFilters?: Record<string, Record<string, number>>;
+  };
+  type Pagefind = {
+    options: (opts: Record<string, unknown>) => Promise<void>;
+    init: () => void;
+    filters: () => Promise<Record<string, Record<string, number>>>;
+    debouncedSearch: (
+      term: string,
+      opts?: Record<string, unknown>,
+      ms?: number,
+    ) => Promise<PagefindSearch | null>;
+  };
+
+  const PAGE_SIZE = 8;
+  const RECENT_KEY = "mfk-recent-searches";
+  const HIGHLIGHT_PARAM = "highlight";
+  const TYPE_STYLE: Record<string, string> = {
+    Minutes: "border-secondary/40 bg-secondary/10 text-secondary",
+    Wiki: "border-primary/40 bg-primary/10 text-sky-700 dark:text-sky-300",
+    Milestones: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  };
+
+  let pagefind: Pagefind | undefined;
+  let results: PagefindSearch["results"] = [];
+  let shown = 0;
+  let active = -1;
+  let type = "";
+  let lastQuery = "";
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  async function loadPagefind() {
+    if (pagefind) return pagefind;
+    // Generated at build time, so it must not go through Vite's module graph.
+    const url = "/pagefind/pagefind.js";
+    pagefind = (await import(/* @vite-ignore */ url)) as Pagefind;
+    await pagefind.options({ excerptLength: 22, highlightParam: HIGHLIGHT_PARAM });
+    pagefind.init();
+    // Loading the filter index up front makes searches report per-type counts.
+    await pagefind.filters();
+    return pagefind;
+  }
+
+  // ---------- recent searches (per-browser convenience; storage may be unavailable) ----------
+  function readRecent(): string[] {
+    try {
+      return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+    } catch {
+      return [];
+    }
+  }
+  function saveRecent(term: string) {
+    const clean = term.trim();
+    if (clean.length < 2) return;
+    try {
+      const next = [clean, ...readRecent().filter((t) => t.toLowerCase() !== clean.toLowerCase())].slice(0, 6);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+    } catch {}
+  }
+  function renderRecent() {
+    const recent = readRecent();
+    $("search-recent-wrap").hidden = recent.length === 0;
+    const box = $("search-recent");
+    box.replaceChildren(
+      ...recent.map((term) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = term;
+        button.className =
+          "rounded-sm border border-black/15 px-2 py-0.5 text-xs hover:bg-black/5 hover:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white";
+        button.addEventListener("click", () => {
+          const input = $<HTMLInputElement>("search-input");
+          input.value = term;
+          input.focus();
+          runSearch();
+        });
+        return button;
+      }),
+    );
+  }
+
+  // ---------- rendering ----------
+  function formatDate(iso?: string) {
+    if (!iso || iso.startsWith("1970")) return undefined;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function resultItem(data: PagefindResultData, index: number) {
+    const kind = data.filters.type?.[0] ?? "";
+    const date = formatDate(data.meta.date);
+    const context = [data.meta.context, date && (kind === "Milestones" ? `Target ${date}` : date)]
+      .filter(Boolean)
+      .join(" · ");
+    const subs = (data.sub_results ?? []).filter((sub) => sub.url.includes("#")).slice(0, 3);
+
+    const li = document.createElement("li");
+    li.setAttribute("role", "option");
+    li.id = `search-result-${index}`;
+    li.dataset.index = String(index);
+    li.innerHTML = `
+      <a href="${data.url}" data-search-result class="block rounded-md border border-transparent px-3 py-2.5 transition-colors">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          ${kind ? `<span class="rounded-sm border px-1.5 py-px font-medium ${TYPE_STYLE[kind] ?? ""}">${kind}</span>` : ""}
+          <span class="text-black/50 dark:text-white/50" data-context></span>
+        </div>
+        <div class="mt-1 font-semibold text-black dark:text-white" data-title></div>
+        <p class="search-excerpt mt-0.5 text-sm">${data.excerpt}</p>
+      </a>
+      ${
+        subs.length
+          ? `<ul class="mb-1 ml-5 space-y-0.5 border-l border-black/10 pl-3 dark:border-white/10">${subs
+              .map(
+                (sub) => `<li><a href="${sub.url}" data-search-result class="block rounded-sm px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/5">
+                  <span class="font-medium text-black dark:text-white" data-sub-title></span>
+                  <span class="search-excerpt block truncate">${sub.excerpt}</span></a></li>`,
+              )
+              .join("")}</ul>`
+          : ""
+      }`;
+    // Titles and context are plain text; set them safely.
+    li.querySelector<HTMLElement>("[data-title]")!.textContent = data.meta.title ?? data.url;
+    li.querySelector<HTMLElement>("[data-context]")!.textContent = context;
+    li.querySelectorAll<HTMLElement>("[data-sub-title]").forEach((el, i) => (el.textContent = `# ${subs[i].title}`));
+    li.querySelector("a")!.addEventListener("mouseenter", () => setActive(index, false));
+    return li;
+  }
+
+  function setActive(index: number, scroll = true) {
+    const items = Array.from($("search-results").children) as HTMLElement[];
+    if (!items.length) return;
+    active = (index + items.length) % items.length;
+    items.forEach((item, i) => {
+      const link = item.querySelector<HTMLElement>("a")!;
+      const on = i === active;
+      item.setAttribute("aria-selected", String(on));
+      link.classList.toggle("border-primary/40", on);
+      link.classList.toggle("bg-primary/10", on);
+    });
+    $("search-input").setAttribute("aria-activedescendant", items[active].id);
+    if (scroll) items[active].scrollIntoView({ block: "nearest" });
+  }
+
+  async function renderMore() {
+    const batch = results.slice(shown, shown + PAGE_SIZE);
+    const query = lastQuery;
+    const data = await Promise.all(batch.map((r) => r.data()));
+    if (query !== lastQuery) return; // a newer search started meanwhile
+    const list = $("search-results");
+    data.forEach((d, i) => list.appendChild(resultItem(d, shown + i)));
+    shown += batch.length;
+    $("search-more").hidden = shown >= results.length;
+    if (active === -1 && shown > 0) setActive(0, false);
+  }
+
+  function sortOption() {
+    const sort = $<HTMLSelectElement>("search-sort").value;
+    return sort === "newest" ? { date: "desc" } : sort === "oldest" ? { date: "asc" } : undefined;
+  }
+
+  async function runSearch() {
+    const term = $<HTMLInputElement>("search-input").value.trim();
+    lastQuery = `${term}|${type}|${$<HTMLSelectElement>("search-sort").value}`;
+    const query = lastQuery;
+    const status = $("search-status");
+    const list = $("search-results");
+
+    $("search-empty-state").hidden = term.length > 0;
+    if (!term) {
+      list.replaceChildren();
+      status.textContent = "";
+      $("search-more").hidden = true;
+      document.querySelectorAll<HTMLElement>("[data-type-count]").forEach((el) => (el.textContent = ""));
+      renderRecent();
+      return;
+    }
+
+    let pf: Pagefind;
+    try {
+      pf = await loadPagefind();
+    } catch {
+      status.textContent = "Search isn't available in this preview. Run a production build (npm run build) to generate the index.";
+      return;
+    }
+    const search = await pf.debouncedSearch(term, {
+      filters: type ? { type } : {},
+      sort: sortOption(),
+    }, 150);
+    if (!search || query !== lastQuery) return;
+
+    results = search.results;
+    shown = 0;
+    active = -1;
+    list.replaceChildren();
+    $("search-input").removeAttribute("aria-activedescendant");
+
+    // Per-type counts ignore the active tab so you can see where else matches are.
+    const counts = search.totalFilters?.type ?? {};
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    document.querySelectorAll<HTMLElement>("[data-search-type]").forEach((button) => {
+      const count = button.dataset.searchType ? (counts[button.dataset.searchType] ?? 0) : total;
+      button.querySelector<HTMLElement>("[data-type-count]")!.textContent = `(${count})`;
+    });
+
+    status.textContent = results.length
+      ? `${results.length} result${results.length === 1 ? "" : "s"} for “${term}”`
+      : `No results for “${term}”${type ? ` in ${type}` : ""}. Try fewer or different words${type ? ", or search All" : ""}.`;
+    await renderMore();
+  }
+
+  // ---------- open / close ----------
+  function openSearch(initial?: string) {
+    const dialog = $<HTMLDialogElement>("search-dialog");
+    if (!dialog) return;
+    if (!dialog.open) dialog.showModal();
+    const input = $<HTMLInputElement>("search-input");
+    if (initial !== undefined) input.value = initial;
+    input.focus();
+    input.select();
+    renderRecent();
+    runSearch();
+    loadPagefind().catch(() => {});
+  }
+
+  function closeSearch() {
+    $<HTMLDialogElement>("search-dialog")?.close();
+  }
+
+  function isTyping(target: EventTarget | null) {
+    const el = target as HTMLElement | null;
+    return !!el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName));
+  }
+
+  function setupDialog() {
+    const dialog = $<HTMLDialogElement>("search-dialog");
+    if (!dialog || dialog.dataset.ready) return;
+    dialog.dataset.ready = "true";
+
+    const input = $<HTMLInputElement>("search-input");
+    input.addEventListener("input", runSearch);
+    input.addEventListener("keydown", (event) => {
+      const count = $("search-results").children.length;
+      if (event.key === "ArrowDown" && count) {
+        event.preventDefault();
+        setActive(active + 1);
+      } else if (event.key === "ArrowUp" && count) {
+        event.preventDefault();
+        setActive(active - 1);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        const link = $("search-results").children[Math.max(active, 0)]?.querySelector<HTMLAnchorElement>("a");
+        link?.click();
+      }
+    });
+
+    $("search-sort").addEventListener("change", runSearch);
+    dialog.querySelectorAll<HTMLButtonElement>("[data-search-type]").forEach((button) => {
+      button.addEventListener("click", () => {
+        type = button.dataset.searchType ?? "";
+        dialog
+          .querySelectorAll<HTMLButtonElement>("[data-search-type]")
+          .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        runSearch();
+        input.focus();
+      });
+    });
+    $("search-more").addEventListener("click", () => renderMore());
+    $("search-recent-clear").addEventListener("click", () => {
+      try {
+        localStorage.removeItem(RECENT_KEY);
+      } catch {}
+      renderRecent();
+      input.focus();
+    });
+
+    dialog.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      // Clicking the backdrop (the dialog element itself) closes it.
+      if (target === dialog) return closeSearch();
+      const link = target.closest<HTMLAnchorElement>("a[data-search-result], a[data-search-close]");
+      if (!link) return;
+      if (link.matches("[data-search-result]")) saveRecent(input.value);
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+      closeSearch();
+      navigate(link.getAttribute("href")!);
+    });
+  }
+
+  // Global shortcuts and the header button (bound once; the dialog persists across navigations).
+  document.addEventListener("keydown", (event) => {
+    const dialog = $<HTMLDialogElement>("search-dialog");
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      dialog?.open ? closeSearch() : openSearch();
+    } else if (event.key === "/" && !dialog?.open && !isTyping(event.target)) {
+      event.preventDefault();
+      openSearch();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if ((event.target as HTMLElement).closest("[data-search-open]")) openSearch();
+  });
+
+  // Highlight the searched terms on the destination page.
+  async function highlightTerms() {
+    if (!new URLSearchParams(location.search).has(HIGHLIGHT_PARAM)) return;
+    try {
+      const url = "/pagefind/pagefind-highlight.js";
+      const { default: PagefindHighlight } = await import(/* @vite-ignore */ url);
+      new PagefindHighlight({
+        highlightParam: HIGHLIGHT_PARAM,
+        markContext: "[data-pagefind-body]",
+        addStyles: false,
+      });
+      document.querySelector(".pagefind-highlight")?.scrollIntoView({ block: "center" });
+    } catch {}
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    setupDialog();
+    highlightTerms();
+  });
+</script>
+
