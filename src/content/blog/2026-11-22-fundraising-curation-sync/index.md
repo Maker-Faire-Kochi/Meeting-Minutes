@@ -3,6 +3,9 @@ title: "Fundraising, Venue Layout & Curation Planning Call"
 description: "Reviewed sponsorship status and the new ~50 lakh starting tier, agreed to use only the two godowns, and kicked off maker curation with daily 8:30 PM syncs."
 date: "2026-11-22"
 tags: ["planning", "sponsorship", "venue", "curation", "marketing"]
+time: "8:30 PM – 9:30 PM IST"
+location: "Google Meet"
+mode: "online"
 attendees: ["Samad", "Kurian", "Abhiram", "Salman Faris", "Jasim CM"]
 ---
 
