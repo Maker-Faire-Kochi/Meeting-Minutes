@@ -35,6 +35,6 @@ Parking feasibility was determined to be excellent, with an estimated capacity o
 
 ## Action Items
 
-- [ ] Obtain and review the CAD drawing from the venue manager - **Abhiram** - May 5, 2026
-- [ ] Identify and finalize usable warehouse sections (go-downs) for stalls - **Samad & Shaan** - May 8, 2026
-- [ ] Draft a preliminary parking zone plan - **Midlaj** - May 10, 2026
+- [x] Obtain and review the CAD drawing from the venue manager - **Abhiram** - May 5, 2026
+- [x] Identify and finalize usable warehouse sections (go-downs) for stalls - **Samad & Shaan** - May 8, 2026
+- [x] Draft a preliminary parking zone plan - **Midlaj** - May 10, 2026

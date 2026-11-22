@@ -46,6 +46,6 @@ Rather than standard bios, maker registration and onboarding will focus on story
 
 ## Action Items
 
-- [ ] Refine the audience outcome list for primary/secondary/tertiary users - **All Attendees** - June 14, 2026
-- [ ] Gather feedback on common community questions to build the website FAQ - **Shan OG** - June 15, 2026
-- [ ] Draft the maker storytelling template for applicant forms - **Jazeel** - June 18, 2026
+- [x] Refine the audience outcome list for primary/secondary/tertiary users - **All Attendees** - June 14, 2026
+- [x] Gather feedback on common community questions to build the website FAQ - **Shan OG** - June 15, 2026
+- [x] Draft the maker storytelling template for applicant forms - **Jazeel** - June 18, 2026

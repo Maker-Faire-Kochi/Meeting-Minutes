@@ -43,6 +43,6 @@ A draft sponsorship structure and target pricing was proposed:
 
 ## Action Items
 
-- [ ] Draft the event manifesto - **Salman Faris** - May 24, 2026
-- [ ] Refine and lock sponsorship deliverables and pricing - **Jaseel & team** - May 28, 2026
-- [ ] Coordinate with Tom (KSUM) and Robu MD for licensing budget - **Abhiram** - May 30, 2026
+- [x] Draft the event manifesto - **Salman Faris** - May 24, 2026
+- [x] Refine and lock sponsorship deliverables and pricing - **Jaseel & team** - May 28, 2026
+- [x] Coordinate with Tom (KSUM) and Robu MD for licensing budget - **Abhiram** - May 30, 2026

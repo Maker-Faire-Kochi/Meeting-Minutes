@@ -28,4 +28,4 @@ A collaborative working document was shared to collect initial thoughts, event f
 
 ## Action Items
 
-- [ ] Review the shared overview document and comment with feedback - **All Attendees** - Next Meeting
+- [x] Review the shared overview document and comment with feedback - **All Attendees** - Next Meeting

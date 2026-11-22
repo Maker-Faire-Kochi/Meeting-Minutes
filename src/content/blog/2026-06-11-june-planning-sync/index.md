@@ -55,12 +55,12 @@ If sponsorship acquisitions are limited, the team discussed several fallback str
 
 | Action Item | Assignee | Deadline | Status |
 | :--- | :--- | :--- | :--- |
-| Create base layout slides for the sponsorship deck | Abhiram | Jun 18, 2026 | Pending |
-| Convert slide notes into polished PDF prospectus | Ashwin + Media | Jun 25, 2026 | Pending |
-| Review and provide feedback on the final sponsor deck | Johan | Jun 28, 2026 | Pending |
-| Consult with Tom (KSUM COO) and MD of Robu regarding sponsorships | Salman Faris | Jun 20, 2026 | Pending |
-| Obtain and share the sample Maker Faire deck | Salman Faris | Jun 15, 2026 | Pending |
-| Update the Make team on ongoing local promotions | Abhiram | Jun 16, 2026 | Pending |
+| Create base layout slides for the sponsorship deck | Abhiram | Jun 18, 2026 | Done |
+| Convert slide notes into polished PDF prospectus | Ashwin + Media | Jun 25, 2026 | Done |
+| Review and provide feedback on the final sponsor deck | Johan | Jun 28, 2026 | Done |
+| Consult with Tom (KSUM COO) and MD of Robu regarding sponsorships | Salman Faris | Jun 20, 2026 | Done |
+| Obtain and share the sample Maker Faire deck | Salman Faris | Jun 15, 2026 | Done |
+| Update the Make team on ongoing local promotions | Abhiram | Jun 16, 2026 | Done |
 
 ---
 

@@ -48,8 +48,8 @@ The team discussed building an engaging, interactive event flow rather than a si
 
 ## Action Items
 
-- [ ] Schedule introductory call with Jennifer from Make's team - **Salman Faris** - May 12, 2026
-- [ ] Share official "Getting Started" Maker Faire playbooks - **Salman Faris** - May 10, 2026
-- [ ] Finalize the draft of the Sponsorship Pitch Deck - **Jasim CM** - May 15, 2026
-- [ ] Deploy the meeting minutes and ecosystem tracker portal skeleton - **Abhiram** - May 14, 2026
-- [ ] Upload ecosystem contacts to the curation spreadsheet - **Samad & Abhiram** - Ongoing
+- [x] Schedule introductory call with Jennifer from Make's team - **Salman Faris** - May 12, 2026
+- [x] Share official "Getting Started" Maker Faire playbooks - **Salman Faris** - May 10, 2026
+- [x] Finalize the draft of the Sponsorship Pitch Deck - **Jasim CM** - May 15, 2026
+- [x] Deploy the meeting minutes and ecosystem tracker portal skeleton - **Abhiram** - May 14, 2026
+- [x] Upload ecosystem contacts to the curation spreadsheet - **Samad & Abhiram** - Ongoing
