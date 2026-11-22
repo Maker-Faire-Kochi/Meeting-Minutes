@@ -3,7 +3,7 @@ title: "Fundraising, Venue Layout & Curation Planning Call"
 description: "Reviewed sponsorship status and the new ~50 lakh starting tier, agreed to use only the two godowns, and kicked off maker curation with daily 8:30 PM syncs."
 date: "2026-11-22"
 tags: ["planning", "sponsorship", "venue", "curation", "marketing"]
-attendees: ["Salman", "Asif", "Abhiram", "Jasi", "Samad", "Susan", "Adeena", "Other team members"]
+attendees: ["Samad", "Kurian", "Abhiram", "Salman Faris", "Jasim CM"]
 ---
 
 ## Agenda
@@ -91,7 +91,7 @@ Ownership is assigned through "On-by" so multiple people do not duplicate outrea
 | Create/standardize the "Curated" sheet with On-by, outreach status and reference IDs | Salman | Next sync | Pending |
 | Begin manual review and outreach from top-ranked makers; mark On-by to avoid duplication | All curation team | Ongoing | Pending |
 | Draft standard DM and email templates (exhibit / workshop / talk invitation; food only, travel and stay conditional) | Salman | Next sync | Pending |
-| Update and reshare the Instagram account list and social amplification plan in the group | Jasi | Next sync | Pending |
+| Update and reshare the Instagram account list and social amplification plan in the group | Jasim CM | Next sync | Pending |
 | Identify 5–10 makers/projects to feature in media early; add to media sheet and start outreach | Media outreach volunteers & Salman | Next sync | Pending |
 
 ---
