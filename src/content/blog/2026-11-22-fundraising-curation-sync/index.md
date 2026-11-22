@@ -33,6 +33,9 @@ attendees: ["Samad", "Kurian", "Abhiram", "Salman Faris", "Jasim CM"]
 > The fundraising team needs two things before they can pitch properly: (1) a clear **2-day event schedule/agenda** and (2) a **sponsor branding inventory** showing where logos appear (stage backdrop, standees, ID cards, venue placements, etc.).
 
 ### 2. Venue, Layout & Design
+> [!IMPORTANT] Venue finalised
+> The venue is finalised as **Chakkolas**.
+
 > [!IMPORTANT] Decision
 > Use **only the two godown/warehouse spaces** for the event setup. The outer area is kept mainly for parking. This reduces cost and avoids expensive structures and finishes such as premium hangars.
 
@@ -109,8 +112,3 @@ Ownership is assigned through "On-by" so multiple people do not duplicate outrea
 > - Confirm the exact number of emails used in the blast (198 vs 298).
 > - Confirm the program elements needed for sponsor pitches: keynotes, inaugural/closing segments, cultural performance, front-row seating and premium sponsor perks.
 > - Confirm Drive and internal tool access permissions for all relevant team members.
-
----
-
-> [!NOTE] AI-assisted minutes
-> These minutes were drafted with the help of AI from the call recording and notes, then formatted and reviewed by the team. Please flag any errors or omissions.

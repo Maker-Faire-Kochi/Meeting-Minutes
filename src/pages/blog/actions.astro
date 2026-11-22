@@ -2,6 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import ActionItemList from "@components/minutes/ActionItemList.astro";
+import AiNotice from "@components/minutes/AiNotice.astro";
 import DocScripts from "@components/DocScripts.astro";
 import { assigneeNames, getMinutes, parseActionItems } from "@lib/minutes";
 
@@ -37,6 +38,7 @@ const selectClass =
 
       <div class="animate space-y-3">
         <h1 class="text-3xl font-semibold text-black dark:text-white">✅ Action tracker</h1>
+        <AiNotice />
         <p>
           Every action item from the minutes, collected automatically from each meeting's
           <em>Action Items</em> section. To close an item, mark it done in the original minutes

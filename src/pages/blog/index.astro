@@ -1,6 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
+import AiNotice from "@components/minutes/AiNotice.astro";
 import MinutesCard from "@components/minutes/MinutesCard.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { BLOG } from "@consts";
@@ -31,6 +32,7 @@ const buttonClass =
       <div class="animate space-y-4">
         <h1 class="text-3xl font-semibold text-black dark:text-white">Meeting minutes</h1>
         <p>{BLOG.DESCRIPTION}</p>
+        <AiNotice />
         <dl class="grid grid-cols-3 gap-3 text-sm">
           <div class="rounded-lg border border-black/15 px-3 py-2 dark:border-white/20">
             <dt class="text-xs">Meetings</dt>

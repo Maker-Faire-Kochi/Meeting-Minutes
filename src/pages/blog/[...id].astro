@@ -11,6 +11,7 @@ import Giscus from "@components/Giscus.astro";
 import DocScripts from "@components/DocScripts.astro";
 import SearchMeta from "@components/SearchMeta.astro";
 import MeetingInfo from "@components/minutes/MeetingInfo.astro";
+import AiNotice from "@components/minutes/AiNotice.astro";
 import MinutesCard from "@components/minutes/MinutesCard.astro";
 import {
   MODE_LABEL,
@@ -102,6 +103,7 @@ const actionClass =
 
     <div class="animate space-y-4">
       <MeetingInfo meeting={post} />
+      <AiNotice />
       {
         actions.length > 0 && (
           <a
