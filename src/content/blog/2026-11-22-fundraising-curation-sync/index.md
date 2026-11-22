@@ -109,3 +109,8 @@ Ownership is assigned through "On-by" so multiple people do not duplicate outrea
 > - Confirm the exact number of emails used in the blast (198 vs 298).
 > - Confirm the program elements needed for sponsor pitches: keynotes, inaugural/closing segments, cultural performance, front-row seating and premium sponsor perks.
 > - Confirm Drive and internal tool access permissions for all relevant team members.
+
+---
+
+> [!NOTE] AI-assisted minutes
+> These minutes were drafted with the help of AI from the call recording and notes, then formatted and reviewed by the team. Please flag any errors or omissions.
