@@ -5,7 +5,7 @@ date: "2026-11-23"
 tags: ["planning", "sponsorship", "curation", "marketing", "partnerships", "venue"]
 location: "Online"
 mode: "online"
-attendees: ["Kurian", "Jasee", "Salman", "Abhiram", "George", "Samad"]
+attendees: ["Salman Faris", "Abhiram", "Jasim CM", "Johan", "Kurian", "Samad"]
 ---
 
 ## Agenda
@@ -29,7 +29,7 @@ Three content formats can be produced quickly:
 - **Carousel posts**, either project-focused or from a "maker profile" angle
 - **Event updates and quick posts** (motion posters, basic announcements)
 
-"Human touch" content (people speaking, creators featured) is likely to get better reach than posters alone. Faces and hosts will be rotated to avoid overexposure (for example alternating Jasee, Abraham and others), and other accounts such as "Tinker Dot Malayalam" can be used too.
+"Human touch" content (people speaking, creators featured) is likely to get better reach than posters alone. Faces and hosts will be rotated to avoid overexposure (for example alternating Jasim, Abraham and others), and other accounts such as "Tinker Dot Malayalam" can be used too.
 
 ### 2. Content Scheduling & Pipeline
 A proper schedule/content calendar is needed, driven by:
@@ -113,7 +113,7 @@ There is no formal partner onboarding flow today. A dedicated **"Partners" sheet
 | Add a "Last Contacted On / Last Updated" timestamp column (automated) | Abhiram | Next sync | Pending |
 | Coordinate outreach to creators/influencers; others route leads to Samad | Samad | Ongoing | Pending |
 | Continue the "Explain the Planet" collaboration (Kerala maker culture video + CTA) | TBD | Next sync | Pending |
-| Proceed with the Calicut short-form plan (up to 10 reels/week, with realistic limits) | Jasee | Next sync | Pending |
+| Proceed with the Calicut short-form plan (up to 10 reels/week, with realistic limits) | Jasim | Next sync | Pending |
 | Follow up on layout status, call Asif and update the group; arrange a survey visit if needed | Salman | Next sync | Pending |
 | Add Asif to future calls starting tomorrow | TBD | Nov 24, 2026 | Pending |
 | Finalize the Arduino title sponsor pitch draft and send the email | TBD | Nov 24, 2026 | Pending |
