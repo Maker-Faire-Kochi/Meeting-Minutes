@@ -29,7 +29,7 @@ Three content formats can be produced quickly:
 - **Carousel posts**, either project-focused or from a "maker profile" angle
 - **Event updates and quick posts** (motion posters, basic announcements)
 
-"Human touch" content (people speaking, creators featured) is likely to get better reach than posters alone. Faces and hosts will be rotated to avoid overexposure (for example alternating Jasim, Abraham and others), and other accounts such as "Tinker Dot Malayalam" can be used too.
+"Human touch" content (people speaking, creators featured) is likely to get better reach than posters alone. Faces and hosts will be rotated to avoid overexposure (for example alternating Jasim, Abhiram and others), and other accounts such as "Tinker Dot Malayalam" can be used too.
 
 ### 2. Content Scheduling & Pipeline
 A proper schedule/content calendar is needed, driven by:
