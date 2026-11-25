@@ -5,7 +5,7 @@ date: "2026-11-25"
 tags: ["planning", "curation", "marketing", "partnerships", "venue", "registrations"]
 location: "Online"
 mode: "online"
-attendees: ["Speaker 1", "Speaker 2", "Speaker 3", "Speaker 4"]
+attendees: ["Johan", "Kurian", "Salman", "Samad", "Abhiram"]
 ---
 
 ## Agenda
@@ -24,8 +24,8 @@ attendees: ["Speaker 1", "Speaker 2", "Speaker 3", "Speaker 4"]
 ## Discussions & Key Decisions
 
 ### 1. Outreach & Partner Follow-ups
-- Speaker 1 has sent an email (including the Instagram-related one) and emailed the Circuit Digest contact. Conversations with people have started.
-- Speaker 2 will continue sending proposals to people on the existing list.
+- Johan has sent an email (including the Instagram-related one) and emailed the Circuit Digest contact. Conversations with people have started.
+- Kurian will continue sending proposals to people on the existing list.
 - Contacts will be tagged with owners so tracking is clear and follow-ups are systematic.
 
 ### 2. Curation & Contact-Tracking Workflow
@@ -44,7 +44,7 @@ Logging workflow:
 The status and colour change after logging. After contacting someone from the main sheet, always map and log it so everything stays centralized.
 
 ### 3. Team Meetup Planning
-An in-person dinner/meetup was suggested to discuss open items, but scheduling conflicts exist. Speaker 1 is not available Tuesday (available until Monday, then only Friday), and Speaker 3 has similar constraints. Speaker 2 will propose alternate Monday or Friday dates.
+An in-person dinner/meetup was suggested to discuss open items, but scheduling conflicts exist. Johan is not available Tuesday (available until Monday, then only Friday), and Salman has similar constraints. Kurian will propose alternate Monday or Friday dates.
 
 ### 4. Social Media & Content Pipeline
 - Social activity is progressing faster in Calicut. Kochi outreach is ongoing but slower.
@@ -73,10 +73,10 @@ Registrations are currently starting within the TinkerHub community, but a publi
 - Exact measurements and CAD drawings are needed (doors, windows, pillars, layout).
 - The vendor quoted about ₹1.5 per sq ft for roughly 33,000 sq ft.
 - If capable architecture students were available they might finish this quickly, but given timing the team may rely on the vendor.
-- Speaker 2 will schedule the survey ("tomorrow or day after") and try to negotiate a lower rate.
+- Kurian will schedule the survey ("tomorrow or day after") and try to negotiate a lower rate.
 
 ### 8. Bots, Voice Cloning & WhatsApp Automation (Side Topic)
-There was a discussion on whether "Abraham" is a bot or a human, voice-cloning possibilities, and "tricky questions" to verify. A hardware product that connects to a phone and runs WhatsApp automation/agent-like behaviour was also mentioned. Speaker 2 will share details with the group.
+There was a discussion on whether "Abraham" is a bot or a human, voice-cloning possibilities, and "tricky questions" to verify. A hardware product that connects to a phone and runs WhatsApp automation/agent-like behaviour was also mentioned. Kurian will share details with the group.
 
 ### 9. App Publishing & Accounts (Side Topic)
 - iOS release has overhead: organisation accounts and a DUNS number.
@@ -90,25 +90,25 @@ There was a discussion on whether "Abraham" is a bot or a human, voice-cloning p
 
 | Action Item | Assignee | Deadline | Status |
 | :--- | :--- | :--- | :--- |
-| Send proposals to all relevant people in the existing list | Speaker 2 | Ongoing | Pending |
+| Send proposals to all relevant people in the existing list | Kurian | Ongoing | Pending |
 | Tag/assign owners to contacts and keep the tracker updated | All | Ongoing | Pending |
-| Continue coordination with the Circuit Digest partner and capture responses/requirements | Speaker 1 | Ongoing | Pending |
-| Share the tracker/log link in the group and make sure everyone has access | Speaker 2 & Speaker 3 | Next sync | Pending |
+| Continue coordination with the Circuit Digest partner and capture responses/requirements | Johan | Ongoing | Pending |
+| Share the tracker/log link in the group and make sure everyone has access | Kurian & Salman | Next sync | Pending |
 | After every outreach, log the date, channel and reply summary | All | Ongoing | Pending |
-| Propose alternate Monday/Friday dates for the team meetup and confirm attendance | Speaker 2 | Next sync | Pending |
-| Ask George/Fab to credit Maker Faire Kochi in relevant releases (route via Nimmi if no response) | Speaker 2 | Next sync | Pending |
-| Polish the "thenga chiraval" reel with animation and post to the main channel | Speaker 1 | Nov 25, 2026 | Pending |
-| Start pushing educational explainer content (what/where/when/why, what to expect) | Speaker 1 & content team (incl. Niyas, Jasim) | Next sync | Pending |
+| Propose alternate Monday/Friday dates for the team meetup and confirm attendance | Kurian | Next sync | Pending |
+| Ask George/Fab to credit Maker Faire Kochi in relevant releases (route via Nimmi if no response) | Kurian | Next sync | Pending |
+| Polish the "thenga chiraval" reel with animation and post to the main channel | Johan | Nov 25, 2026 | Pending |
+| Start pushing educational explainer content (what/where/when/why, what to expect) | Johan & content team (incl. Niyas, Jasim) | Next sync | Pending |
 | Draft a lightweight content plan for the post-exam period | Social team | Next sync | Pending |
-| Add/enable a public "Interest to Attend" form on the Maker Faire website | Speaker 1 & Speaker 3 | Next sync | Pending |
-| Draft "Call for Makers" requirements/format from other Maker Faires and share on WhatsApp | Speaker 2 | Next sync | Pending |
-| Combine makers, exhibitions and other categories into a single form/page if possible | Speaker 4 | Next sync | Pending |
-| Continue building out studio.makerfaire… and define the AI-enabled workflows needed | Speaker 2 | Ongoing | Pending |
+| Add/enable a public "Interest to Attend" form on the Maker Faire website | Johan & Salman | Next sync | Pending |
+| Draft "Call for Makers" requirements/format from other Maker Faires and share on WhatsApp | Kurian | Next sync | Pending |
+| Combine makers, exhibitions and other categories into a single form/page if possible | Samad | Next sync | Pending |
+| Continue building out studio.makerfaire… and define the AI-enabled workflows needed | Kurian | Ongoing | Pending |
 | Connect AI capabilities into the studio environment | Shanu | Next sync | Pending |
-| Schedule the venue survey and try to negotiate a lower rate | Speaker 2 | Nov 26–27, 2026 | Pending |
-| Identify/share architecture students or contacts who can help or validate measurements | Speaker 1 | Next sync | Pending |
-| Share details/link of the WhatsApp automation hardware product | Speaker 2 | Next sync | Pending |
-| Share the official Apple Developer Program for Nonprofits link and eligibility constraints | Speaker 3 | Next sync | Pending |
+| Schedule the venue survey and try to negotiate a lower rate | Kurian | Nov 26–27, 2026 | Pending |
+| Identify/share architecture students or contacts who can help or validate measurements | Johan | Next sync | Pending |
+| Share details/link of the WhatsApp automation hardware product | Kurian | Next sync | Pending |
+| Share the official Apple Developer Program for Nonprofits link and eligibility constraints | Salman | Next sync | Pending |
 
 ---
 
